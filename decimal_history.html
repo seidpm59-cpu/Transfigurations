@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decimal Transfiguration</title>
+<link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0b07;
+    --panel: #1c1408;
+    --panel2: #221a0a;
+    --accent: #f5c842;
+    --accent2: #c8a84b;
+    --accent3: #e05c2a;
+    --teal: #4ec9b0;
+    --text: #f0e6c8;
+    --muted: #8a7a5a;
+    --digit-bg: #2a1f0e;
+    --dot-color: #f5c842;
+    --border: #3d2e14;
+    --glow: rgba(245,200,66,0.35);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(80,40,10,0.5) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(60,30,5,0.4) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Floating magic particles */
+  body::before {
+    content: '✦ ✧ ⋆ ✦ ✧ ⋆ ✦ ✧ ⋆ ✦ ✧ ⋆';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    font-size: 0.7rem;
+    color: rgba(245,200,66,0.15);
+    letter-spacing: 3vw;
+    word-spacing: 4vw;
+    line-height: 3;
+    pointer-events: none;
+    z-index: 0;
+    animation: drift 30s linear infinite;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  @keyframes drift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* HEADER */
+  .site-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hedwig {
+    width: 90px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 12px rgba(245,200,66,0.5));
+    animation: hover-owl 4s ease-in-out infinite;
+  }
+  @keyframes hover-owl {
+    0%,100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-8px) rotate(2deg); }
+  }
+
+  h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    font-weight: 900;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-align: center;
+    text-shadow: 0 0 20px var(--glow), 0 2px 4px rgba(0,0,0,0.8);
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 0;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .house-rule {
+    width: 260px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    margin: 10px auto 0;
+    opacity: 0.6;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+    z-index: 1;
+    position: relative;
+  }
+  .tab-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    font-weight: 400;
+    font-size: 0.78rem;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .tab-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .tab-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(245,200,66,0.08);
+    box-shadow: 0 0 12px rgba(245,200,66,0.15);
+  }
+
+  .tab-panel { display: none; width: 100%; max-width: 720px; position: relative; z-index: 1; }
+  .tab-panel.active { display: block; }
+
+  /* CARDS — parchment style */
+  .card {
+    background: var(--panel2);
+    border-radius: 8px;
+    padding: 22px;
+    margin-bottom: 18px;
+    border: 1px solid var(--border);
+    box-shadow: inset 0 1px 0 rgba(245,200,66,0.06), 0 4px 20px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(245,200,66,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* NUMBER DISPLAY */
+  .number-display-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .number-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 80px;
+    flex-wrap: nowrap;
+  }
+
+  .digit-box {
+    background: var(--digit-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 56px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3);
+  }
+
+  .digit-box.highlight {
+    border-color: var(--teal);
+    background: rgba(78,201,176,0.1);
+    transform: scale(1.06);
+  }
+
+  .decimal-slot {
+    width: 20px;
+    height: 72px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .dot {
+    width: 14px;
+    height: 14px;
+    background: var(--dot-color);
+    border-radius: 50%;
+    box-shadow: 0 0 16px var(--dot-color), 0 0 32px rgba(245,200,66,0.4);
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    cursor: grab;
+    position: absolute;
+    bottom: 8px;
+  }
+  .dot:active { cursor: grabbing; }
+
+  .drop-zone {
+    width: 20px;
+    height: 72px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 8px;
+    position: relative;
+    flex-shrink: 0;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .drop-zone.drag-over { background: rgba(245,200,66,0.12); }
+  .drop-zone::after {
+    content: '';
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 2px dashed rgba(245,200,66,0.25);
+    position: absolute;
+    bottom: 10px;
+  }
+
+  /* Arrow controls */
+  .controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .arrow-btn {
+    background: var(--digit-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 52px;
+    height: 52px;
+    font-size: 1.4rem;
+    color: var(--accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-family: 'Space Mono', monospace;
+  }
+  .arrow-btn:hover {
+    border-color: var(--accent);
+    background: rgba(245,200,66,0.1);
+    transform: scale(1.05);
+    box-shadow: 0 0 10px var(--glow);
+  }
+  .arrow-btn:active { transform: scale(0.97); }
+
+  .position-label {
+    font-family: 'Crimson Text', serif;
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-align: center;
+    min-width: 120px;
+    font-style: italic;
+  }
+
+  /* VALUE INFO */
+  .value-info {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .val-chip {
+    background: var(--digit-bg);
+    border-radius: 6px;
+    padding: 10px 16px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .val-chip .label {
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    font-family: 'Cinzel', serif;
+  }
+  .val-chip .value {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--teal);
+  }
+
+  /* OBJECT GRID */
+  .objects-section { margin-top: 4px; }
+  .objects-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-family: 'Cinzel', serif;
+  }
+  .objects-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    min-height: 60px;
+    align-content: flex-start;
+  }
+  .obj-dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent3);
+    opacity: 0.85;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .obj-dot.group-of-10 { background: var(--teal); }
+  .obj-dot.group-of-100 { background: var(--accent); width: 24px; height: 24px; }
+  .group-sep {
+    width: 2px; height: 18px;
+    background: var(--border);
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .too-many {
+    font-size: 0.9rem;
+    color: var(--muted);
+    padding: 8px;
+    font-style: italic;
+  }
+
+  /* EXPLANATION BOX — scroll/parchment style */
+  .explanation {
+    background: rgba(245,200,66,0.05);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: #d4c49a;
+    margin-top: 4px;
+    font-family: 'Crimson Text', serif;
+  }
+  .explanation strong { color: var(--accent2); }
+
+  /* TASK 2 */
+  .strategy-steps { display: flex; flex-direction: column; gap: 16px; }
+  .step-card {
+    background: var(--digit-bg);
+    border-radius: 8px;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    transition: border-color 0.3s;
+  }
+  .step-card.active-step { border-color: var(--accent); }
+  .step-card.done-step { border-color: #2a5a2a; background: rgba(40,100,40,0.08); }
+
+  .step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .step-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 900;
+    font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-family: 'Cinzel', serif;
+  }
+  .step-title { font-weight: 700; font-size: 1rem; font-family: 'Cinzel', serif; }
+
+  .mini-number-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+  .mini-digit {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    width: 42px; height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.5rem; font-weight: 700;
+    color: var(--text);
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+  .mini-digit.changed { border-color: var(--accent); color: var(--accent); background: rgba(245,200,66,0.08); }
+  .mini-dot-slot {
+    width: 14px; height: 56px;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 6px; flex-shrink: 0;
+  }
+  .mini-dot {
+    width: 10px; height: 10px;
+    background: var(--dot-color); border-radius: 50%;
+    box-shadow: 0 0 8px var(--dot-color);
+    transition: all 0.3s;
+  }
+  .mini-dot.hidden { opacity: 0; }
+  .op-symbol {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.8rem; color: var(--teal); font-weight: 700; margin: 0 6px;
+  }
+  .result-line {
+    font-family: 'Space Mono', monospace;
+    font-size: 1rem; color: var(--accent); text-align: center; margin-top: 8px; font-weight: 700;
+  }
+
+  .step-btn {
+    background: linear-gradient(135deg, #8b6914, #c8a84b);
+    color: #1a1000;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 22px;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .step-btn:hover { opacity: 0.9; transform: scale(1.02); box-shadow: 0 0 14px var(--glow); }
+  .step-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 6px 16px;
+    font-family: 'Cinzel', serif;
+    font-weight: 400;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+  .reset-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+
+  .number-picker {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px;
+  }
+  .picker-group { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .picker-label { font-size: 0.78rem; color: var(--muted); font-family: 'Cinzel', serif; letter-spacing: 0.5px; }
+  .picker-input {
+    background: var(--digit-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 1.1rem; font-weight: 700;
+    width: 80px; text-align: center; padding: 8px;
+    border-radius: 6px; outline: none;
+  }
+  .picker-input:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--glow); }
+
+  .x10-badge {
+    font-size: 0.7rem; color: var(--accent); font-weight: 700;
+    letter-spacing: 1px; text-align: center; font-family: 'Cinzel', serif;
+  }
+
+  .op-toggle {
+    background: var(--digit-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    font-weight: 400;
+    font-size: 0.8rem;
+    padding: 7px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .op-toggle:hover { border-color: var(--accent2); color: var(--accent2); }
+  .op-toggle.active-op {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(245,200,66,0.08);
+    box-shadow: 0 0 10px rgba(245,200,66,0.15);
+  }
+
+  @media (max-width: 500px) {
+    .digit-box { width: 44px; height: 60px; font-size: 1.5rem; }
+    .decimal-slot, .drop-zone { width: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEDWIG + TITLE -->
+<div class="site-header">
+  <!-- Hedwig SVG owl -->
+  <svg class="hedwig" viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg">
+    <!-- body -->
+    <ellipse cx="60" cy="80" rx="32" ry="38" fill="#f5f0e8" stroke="#c8b89a" stroke-width="1.5"/>
+    <!-- wing left -->
+    <ellipse cx="28" cy="85" rx="20" ry="14" fill="#e8e0cc" stroke="#c0a870" stroke-width="1" transform="rotate(-20,28,85)"/>
+    <!-- wing right -->
+    <ellipse cx="92" cy="85" rx="20" ry="14" fill="#e8e0cc" stroke="#c0a870" stroke-width="1" transform="rotate(20,92,85)"/>
+    <!-- feather markings body -->
+    <line x1="60" y1="55" x2="60" y2="115" stroke="#c8b89a" stroke-width="0.8" opacity="0.5"/>
+    <line x1="45" y1="60" x2="75" y2="60" stroke="#c8b89a" stroke-width="0.8" opacity="0.4"/>
+    <line x1="43" y1="72" x2="77" y2="72" stroke="#c8b89a" stroke-width="0.8" opacity="0.4"/>
+    <line x1="44" y1="84" x2="76" y2="84" stroke="#c8b89a" stroke-width="0.8" opacity="0.4"/>
+    <line x1="46" y1="96" x2="74" y2="96" stroke="#c8b89a" stroke-width="0.8" opacity="0.4"/>
+    <!-- head -->
+    <ellipse cx="60" cy="42" rx="22" ry="22" fill="#f5f0e8" stroke="#c8b89a" stroke-width="1.5"/>
+    <!-- ear tufts -->
+    <polygon points="46,24 42,12 50,20" fill="#e8e0cc" stroke="#c8b89a" stroke-width="1"/>
+    <polygon points="74,24 78,12 70,20" fill="#e8e0cc" stroke="#c8b89a" stroke-width="1"/>
+    <!-- face disc -->
+    <ellipse cx="60" cy="44" rx="16" ry="15" fill="#f0e8d0" stroke="#d4b896" stroke-width="1"/>
+    <!-- eyes -->
+    <circle cx="53" cy="40" r="6" fill="#2a1800" stroke="#8b6914" stroke-width="1.5"/>
+    <circle cx="67" cy="40" r="6" fill="#2a1800" stroke="#8b6914" stroke-width="1.5"/>
+    <circle cx="54.5" cy="38.5" r="2" fill="#f5c842" opacity="0.9"/>
+    <circle cx="68.5" cy="38.5" r="2" fill="#f5c842" opacity="0.9"/>
+    <circle cx="55.5" cy="38" r="1" fill="white" opacity="0.8"/>
+    <circle cx="69.5" cy="38" r="1" fill="white" opacity="0.8"/>
+    <!-- beak -->
+    <polygon points="60,46 56,52 64,52" fill="#c8a84b" stroke="#a07820" stroke-width="0.8"/>
+    <!-- letter in talons -->
+    <rect x="44" y="108" width="32" height="22" rx="2" fill="#f5f0d8" stroke="#c8a84b" stroke-width="1.5"/>
+    <line x1="50" y1="114" x2="70" y2="114" stroke="#8b6914" stroke-width="1" opacity="0.6"/>
+    <line x1="50" y1="119" x2="70" y2="119" stroke="#8b6914" stroke-width="1" opacity="0.6"/>
+    <line x1="50" y1="124" x2="62" y2="124" stroke="#8b6914" stroke-width="1" opacity="0.6"/>
+    <!-- wax seal -->
+    <circle cx="68" cy="124" r="5" fill="#8b1a1a" stroke="#600" stroke-width="0.8"/>
+    <text x="68" y="127" text-anchor="middle" font-size="5" fill="#f5c842" font-family="serif">H</text>
+    <!-- talons -->
+    <line x1="50" y1="108" x2="46" y2="118" stroke="#c8a84b" stroke-width="2" stroke-linecap="round"/>
+    <line x1="70" y1="108" x2="74" y2="118" stroke="#c8a84b" stroke-width="2" stroke-linecap="round"/>
+    <!-- magic sparkles around -->
+    <circle cx="18" cy="50" r="2" fill="#f5c842" opacity="0.7"><animate attributeName="opacity" values="0.7;0.1;0.7" dur="2.1s" repeatCount="indefinite"/></circle>
+    <circle cx="102" cy="55" r="1.5" fill="#f5c842" opacity="0.5"><animate attributeName="opacity" values="0.5;0.1;0.5" dur="1.7s" repeatCount="indefinite"/></circle>
+    <circle cx="25" cy="100" r="1.5" fill="#f5c842" opacity="0.6"><animate attributeName="opacity" values="0.6;0.1;0.6" dur="2.5s" repeatCount="indefinite"/></circle>
+    <circle cx="98" cy="95" r="2" fill="#f5c842" opacity="0.5"><animate attributeName="opacity" values="0.5;0.1;0.5" dur="1.9s" repeatCount="indefinite"/></circle>
+  </svg>
+
+  <h1>Decimal Transfiguration</h1>
+  <p class="subtitle">Learn the ancient magic of moving the decimal point</p>
+  <div class="house-rule"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab(0)">✦ Spell I: Slide</button>
+  <button class="tab-btn" onclick="switchTab(1)">✦ Spell II: Strategy</button>
+  <button class="tab-btn" onclick="switchTab(2)">🏆 O.W.L. Exam</button>
+</div>
+
+<!-- ===== TAB 1 ===== -->
+<div class="tab-panel active" id="tab0">
+  <div class="card">
+    <div class="number-display-wrap">
+      <div class="number-picker">
+        <div class="picker-group">
+          <div class="picker-label">Enter a number</div>
+          <input class="picker-input" id="startNumber" type="number" value="25" min="0" max="9999" step="1" oninput="initTask1()">
+        </div>
+      </div>
+
+      <div id="numberRow" class="number-row"></div>
+
+      <div class="controls">
+        <button class="arrow-btn" onclick="moveDecimal(-1)" title="Move left ÷10">◀</button>
+        <div class="position-label" id="posLabel">Decimal position</div>
+        <button class="arrow-btn" onclick="moveDecimal(1)" title="Move right ×10">▶</button>
+      </div>
+
+      <div class="value-info">
+        <div class="val-chip">
+          <div class="label">Original</div>
+          <div class="value" id="origVal">25</div>
+        </div>
+        <div class="val-chip">
+          <div class="label">Current value</div>
+          <div class="value" id="curVal">25.0</div>
+        </div>
+        <div class="val-chip">
+          <div class="label">Change</div>
+          <div class="value" id="changeVal">×1</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card objects-section">
+    <div class="objects-label">Objects (visual count)</div>
+    <div id="objectsGrid" class="objects-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="explanation" id="explanation">
+      Move the decimal point left to <strong>divide by 10</strong>, or right to <strong>multiply by 10</strong>. Even Hermione started here.
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB 2: STRATEGY ===== -->
+<div class="tab-panel" id="tab1">
+
+  <!-- Intro -->
+  <div class="card" style="padding:18px 20px">
+    <div style="color:var(--muted);font-size:0.88rem;line-height:1.6">
+      <strong style="color:var(--accent2)">Strategy:</strong> Shift both numbers' decimals the same way to make them simpler, calculate, then shift the result back.
+    </div>
+  </div>
+
+  <!-- Number inputs + operation selector -->
+  <div class="card">
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:14px">
+      <button id="opBtnAdd" class="op-toggle active-op" onclick="setOp('+')">＋ Addition</button>
+      <button id="opBtnSub" class="op-toggle" onclick="setOp('-')">－ Subtraction</button>
+    </div>
+    <div class="number-picker" style="margin-bottom:0">
+      <div class="picker-group">
+        <div class="picker-label">Number A</div>
+        <input class="picker-input" id="numA" type="number" value="50" oninput="initStrategy()">
+      </div>
+      <div class="picker-group" style="justify-content:center;padding-top:22px">
+        <span id="opSymbol" style="font-size:1.5rem;color:var(--accent2);font-weight:900">+</span>
+      </div>
+      <div class="picker-group">
+        <div class="picker-label">Number B</div>
+        <input class="picker-input" id="numB" type="number" value="30" oninput="initStrategy()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive workspace -->
+  <div class="card" id="strategyWorkspace">
+    <!-- rendered by JS -->
+  </div>
+
+</div>
+
+<!-- ===== TAB 3: CHALLENGE ===== -->
+<div class="tab-panel" id="tab2">
+
+  <!-- Score bar -->
+  <div class="card" style="padding:16px 20px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;gap:16px">
+        <div class="val-chip" style="padding:8px 16px">
+          <div class="label">Question</div>
+          <div class="value" id="cq-num" style="color:var(--accent)">—</div>
+        </div>
+        <div class="val-chip" style="padding:8px 16px">
+          <div class="label">✅ Correct</div>
+          <div class="value" id="cq-correct" style="color:#50e090">0</div>
+        </div>
+        <div class="val-chip" style="padding:8px 16px">
+          <div class="label">❌ Wrong</div>
+          <div class="value" id="cq-wrong" style="color:var(--accent3)">0</div>
+        </div>
+      </div>
+      <button class="reset-btn" onclick="startChallenge()">↺ New Challenge</button>
+    </div>
+  </div>
+
+  <!-- Op mode selector -->
+  <div class="card" style="padding:14px 20px">
+    <div style="font-size:0.75rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;text-align:center">Choose operation</div>
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+      <button id="cqBtn-addition" class="op-toggle active-op" onclick="setCqMode('addition')">＋ Addition</button>
+      <button id="cqBtn-subtraction" class="op-toggle" onclick="setCqMode('subtraction')">－ Subtraction</button>
+      <button id="cqBtn-mixed" class="op-toggle" onclick="setCqMode('mixed')">＋／－ Mixed</button>
+    </div>
+  </div>
+
+  <!-- Question workspace -->
+  <div class="card" id="cq-workspace">
+    <div style="text-align:center;padding:20px">
+      <div style="font-size:1.1rem;color:var(--muted);margin-bottom:20px">Ready to test your decimal skills?</div>
+      <button class="step-btn" style="font-size:1rem;padding:12px 28px" onclick="startChallenge()">Start 10-Question Challenge 🚀</button>
+    </div>
+  </div>
+
+  <!-- Results log -->
+  <div class="card" id="cq-log" style="display:none">
+    <div class="objects-label" style="margin-bottom:12px">This Attempt — Question Log</div>
+    <div id="cq-log-lines"></div>
+  </div>
+
+  <!-- Persistent history -->
+  <div class="card" id="cq-history-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div class="objects-label" style="margin-bottom:0">📜 Spell Book — Past Attempts</div>
+      <button class="reset-btn" style="margin-top:0" onclick="clearHistory()">✕ Clear History</button>
+    </div>
+    <div id="cq-history-lines">
+      <div style="color:var(--muted);font-style:italic;font-size:0.9rem">No attempts yet — complete a challenge to record your first entry!</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================
+// TASK 1
+// ============================
+let baseNumber = 25;
+let decimalOffset = 0; // 0 = after integer portion, -1 = move left one, +1 = right
+
+function initTask1() {
+  const raw = parseFloat(document.getElementById('startNumber').value);
+  if (isNaN(raw) || raw < 0) return;
+  baseNumber = raw;
+  decimalOffset = 0;
+  renderTask1();
+}
+
+function moveDecimal(dir) {
+  decimalOffset += dir;
+  // clamp
+  const digits = getDigits();
+  const maxRight = digits.length - 1;
+  const maxLeft = -(digits.length);
+  decimalOffset = Math.max(maxLeft, Math.min(maxRight, decimalOffset));
+  renderTask1();
+}
+
+function getDigits() {
+  // work with integer only base
+  const intStr = Math.round(baseNumber).toString().replace('-','');
+  return intStr.split('');
+}
+
+function getCurrentValue() {
+  // decimalOffset: negative = move left (divide), positive = move right (multiply)
+  const factor = Math.pow(10, decimalOffset);
+  return baseNumber * factor;
+}
+
+function renderTask1() {
+  const digits = getDigits();
+  // decimalPos = index in displayed array where dot goes (between digits)
+  // 0 = after last digit (original), -1 = one from right, etc.
+  // displayed digits: we show original digits + trailing/leading zeros
+  
+  const curVal = getCurrentValue();
+  
+  // Build display: digits + zeros as needed
+  let displayDigits = [...digits];
+  let dotPos; // dot appears AFTER this index (0-based), or -0.5 means before all digits
+
+  // Original dot is after all digits (it's an integer)
+  // decimalOffset = 0: show "25." then 0 (e.g. 25.0)
+  // decimalOffset = -1: show "2.5"
+  // decimalOffset = +1: show "250."
+
+  // dotPos in the digit array (0 = before first digit, n = after last)
+  let naturalDotPos = digits.length; // after last digit = integer
+  let dotPosInDigits = naturalDotPos + decimalOffset;
+
+  // Add leading zeros if needed
+  while (dotPosInDigits <= 0) {
+    displayDigits.unshift('0');
+    dotPosInDigits++;
+    naturalDotPos++;
+  }
+  // Add trailing zeros if needed
+  while (dotPosInDigits >= displayDigits.length) {
+    displayDigits.push('0');
+  }
+  // Always add one extra zero if dot is at end
+  if (dotPosInDigits === displayDigits.length) {
+    displayDigits.push('0');
+  }
+
+  // Build HTML
+  const row = document.getElementById('numberRow');
+  row.innerHTML = '';
+
+  displayDigits.forEach((d, i) => {
+    // Insert drop zone / dot slot before this digit?
+    if (i === dotPosInDigits) {
+      const dotSlot = document.createElement('div');
+      dotSlot.className = 'decimal-slot';
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      dotSlot.appendChild(dot);
+      row.appendChild(dotSlot);
+    }
+
+    const box = document.createElement('div');
+    box.className = 'digit-box';
+    box.textContent = d;
+    // highlight digits that are "moved"
+    if (decimalOffset !== 0 && i < digits.length + (dotPosInDigits <= 0 ? naturalDotPos - digits.length : 0)) {
+      // just highlight the non-zero original digits
+    }
+    row.appendChild(box);
+  });
+
+  // Update labels
+  const origVal = baseNumber;
+  document.getElementById('origVal').textContent = origVal;
+  document.getElementById('curVal').textContent = formatNum(curVal);
+  
+  const ratio = curVal / baseNumber;
+  let changeText;
+  if (ratio === 1) changeText = '×1';
+  else if (ratio > 1) changeText = `×${formatNum(ratio)}`;
+  else changeText = `÷${formatNum(1/ratio)}`;
+  document.getElementById('changeVal').textContent = changeText;
+
+  // Position label
+  if (decimalOffset === 0) {
+    document.getElementById('posLabel').textContent = 'Original position';
+  } else if (decimalOffset < 0) {
+    document.getElementById('posLabel').textContent = `${Math.abs(decimalOffset)} step${Math.abs(decimalOffset)>1?'s':''} left → ÷${Math.pow(10, Math.abs(decimalOffset))}`;
+  } else {
+    document.getElementById('posLabel').textContent = `${decimalOffset} step${decimalOffset>1?'s':''} right → ×${Math.pow(10, decimalOffset)}`;
+  }
+
+  // Explanation
+  updateExplanation(curVal, origVal, decimalOffset);
+
+  // Objects
+  renderObjects(curVal);
+}
+
+function formatNum(n) {
+  if (Number.isInteger(n)) return n.toString();
+  // show up to 4 sig figs
+  return parseFloat(n.toPrecision(4)).toString();
+}
+
+function updateExplanation(cur, orig, offset) {
+  const el = document.getElementById('explanation');
+  if (offset === 0) {
+    el.innerHTML = `The decimal point is at its <strong>original position</strong>. The value is <strong>${formatNum(cur)}</strong>. Moving left divides by 10, moving right multiplies by 10.`;
+  } else if (offset < 0) {
+    const factor = Math.pow(10, Math.abs(offset));
+    el.innerHTML = `You moved the decimal <strong>${Math.abs(offset)} step${Math.abs(offset)>1?'s':''} left</strong>. That divides the number by <strong>${factor}</strong>: ${formatNum(orig)} ÷ ${factor} = <strong>${formatNum(cur)}</strong>.`;
+  } else {
+    const factor = Math.pow(10, offset);
+    el.innerHTML = `You moved the decimal <strong>${offset} step${offset>1?'s':''} right</strong>. That multiplies the number by <strong>${factor}</strong>: ${formatNum(orig)} × ${factor} = <strong>${formatNum(cur)}</strong>.`;
+  }
+}
+
+function renderObjects(value) {
+  const grid = document.getElementById('objectsGrid');
+  grid.innerHTML = '';
+  
+  const rounded = Math.round(value);
+  
+  if (rounded <= 0) {
+    grid.innerHTML = '<div class="too-many">Value is 0 or less — no objects to show</div>';
+    return;
+  }
+  if (rounded > 500) {
+    grid.innerHTML = `<div class="too-many">Value = ${formatNum(value)} — too many to show individually! That's ${formatNum(value)} objects. 🎉</div>`;
+    return;
+  }
+  if (value < 1 && value > 0) {
+    grid.innerHTML = `<div class="too-many">Value = ${formatNum(value)} — less than one object. A fraction! 🔬</div>`;
+    return;
+  }
+
+  // Group into 10s
+  const hundreds = Math.floor(rounded / 100);
+  const tens = Math.floor((rounded % 100) / 10);
+  const ones = rounded % 10;
+
+  for (let h = 0; h < hundreds; h++) {
+    for (let i = 0; i < 10; i++) {
+      const d = document.createElement('div');
+      d.className = 'obj-dot group-of-100';
+      d.title = 'Part of a hundred';
+      grid.appendChild(d);
+    }
+    if (h < hundreds - 1 || tens > 0 || ones > 0) {
+      const sep = document.createElement('div');
+      sep.className = 'group-sep';
+      grid.appendChild(sep);
+    }
+  }
+
+  for (let t = 0; t < tens; t++) {
+    for (let i = 0; i < 10; i++) {
+      const d = document.createElement('div');
+      d.className = 'obj-dot group-of-10';
+      d.title = 'Part of a ten';
+      grid.appendChild(d);
+    }
+    if (t < tens - 1 || ones > 0) {
+      const sep = document.createElement('div');
+      sep.className = 'group-sep';
+      grid.appendChild(sep);
+    }
+  }
+
+  for (let i = 0; i < ones; i++) {
+    const d = document.createElement('div');
+    d.className = 'obj-dot';
+    grid.appendChild(d);
+  }
+}
+
+// ============================
+// TASK 2 — FREE FORM STRATEGY
+// ============================
+
+// State: offsets for A, B, and the result
+let sA = 0, sB = 0, sResult = 0;
+let baseA = 50, baseB = 30;
+let stratOp = '+';   // '+' or '-'
+let sumDone = false;
+let sumEntryWrong = false;
+let logEntries = [];
+
+function setOp(op) {
+  stratOp = op;
+  document.getElementById('opSymbol').textContent = op === '+' ? '+' : '−';
+  document.getElementById('opBtnAdd').classList.toggle('active-op', op === '+');
+  document.getElementById('opBtnSub').classList.toggle('active-op', op === '-');
+  initStrategy();
+}
+
+function initStrategy() {
+  baseA = parseFloat(document.getElementById('numA').value) || 0;
+  baseB = parseFloat(document.getElementById('numB').value) || 0;
+  sA = 0; sB = 0; sResult = 0;
+  sumDone = false;
+  sumEntryWrong = false;
+  logEntries = [];
+  renderStrategy();
+}
+
+function shiftNum(which, dir) {
+  if (which === 'A') sA += dir;
+  else if (which === 'B') sB += dir;
+  else if (which === 'R') sResult += dir;
+
+  const factor = dir > 0 ? `×10` : `÷10`;
+  const label = which === 'A' ? 'A' : which === 'B' ? 'B' : 'Result';
+  addLog(`Shifted ${label} decimal ${dir > 0 ? 'right' : 'left'} (${factor})`);
+  renderStrategy();
+}
+
+function trySum() {
+  const input = document.getElementById('sumInput');
+  const userVal = parseFloat(input.value);
+  const curA = applyOffset(baseA, sA);
+  const curB = applyOffset(baseB, sB);
+  const correctSum = stratOp === '+' ? round14(curA + curB) : round14(curA - curB);
+  if (isNaN(userVal) || Math.abs(userVal - correctSum) > 1e-9) {
+    sumEntryWrong = true;
+    renderStrategy();
+    return;
+  }
+  sumEntryWrong = false;
+  window._sumBase = correctSum;
+  sumDone = true;
+  sResult = 0;
+  renderStrategy();
+}
+
+function doAdd() {
+  // kept for compatibility — now routes through trySum
+  trySum();
+}
+
+function resetStrategy() {
+  initStrategy();
+}
+
+function applyOffset(base, offset) {
+  return round14(base * Math.pow(10, offset));
+}
+
+function round14(n) {
+  return parseFloat(n.toPrecision(14));
+}
+
+function fmtN(n) {
+  if (n === 0) return '0';
+  const s = parseFloat(n.toPrecision(10)).toString();
+  return s;
+}
+
+function addLog(msg) {
+  // Log removed — keeping function stub so shiftNum/doAdd don't error
+}
+
+// Render arrow trail showing how many places shifted and in which direction
+// e.g. sA = -2  →  ◀◀   sA = +1  →  ▶
+function shiftArrows(count, leftColor, rightColor) {
+  if (count === 0) return `<div style="min-height:20px;font-size:0.72rem;color:var(--muted);font-style:italic">not moved</div>`;
+  const dir = count < 0 ? 'left' : 'right';
+  const arrow = count < 0 ? '◀' : '▶';
+  const color = count < 0 ? leftColor : rightColor;
+  const n = Math.abs(count);
+  const arrows = Array(n).fill(arrow).join('');
+  return `<div style="font-size:1rem;color:${color};letter-spacing:2px;font-weight:700;line-height:1">${arrows}</div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-top:2px">${n} place${n>1?'s':''} ${dir}</div>`;
+}
+
+// Render a number as digit boxes with decimal dot
+function buildNumberDisplay(value, onLeft, onRight, label, color, shiftCount) {
+  const absVal = Math.abs(value);
+  const negative = value < 0;
+
+  let str = fmtN(absVal);
+  if (!str.includes('.')) str = str + '.0';
+
+  const parts = str.split('.');
+  let intPart = (negative ? '-' : '') + parts[0];
+  let decPart = parts[1] || '0';
+
+  let html = `<div style="display:flex;flex-direction:column;align-items:center;gap:6px">`;
+  html += `<div style="font-size:0.72rem;color:${color};letter-spacing:1px;text-transform:uppercase;font-weight:700">${label}</div>`;
+
+  // Digit row
+  html += `<div style="display:flex;align-items:flex-end;gap:2px;flex-wrap:nowrap">`;
+  for (const ch of intPart) {
+    const isMinus = ch === '-';
+    html += `<div class="mini-digit" style="border-color:#353852;${isMinus?'width:20px;font-size:1.1rem;color:var(--accent3)':''}">${ch}</div>`;
+  }
+  html += `<div class="mini-dot-slot"><div class="mini-dot" style="background:${color};box-shadow:0 0 8px ${color}"></div></div>`;
+  for (const ch of decPart) {
+    html += `<div class="mini-digit" style="border-color:#353852;color:#b0c0e0">${ch}</div>`;
+  }
+  html += `</div>`;
+
+  // Arrow trail showing shift history
+  html += `<div style="text-align:center;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    ${shiftArrows(shiftCount, 'var(--accent3)', '#50d090')}
+  </div>`;
+
+  // Shift buttons
+  html += `<div style="display:flex;gap:6px;align-items:center">`;
+  if (onLeft)  html += `<button class="arrow-btn" style="width:38px;height:38px;font-size:1rem" onclick="${onLeft}">◀</button>`;
+  if (onRight) html += `<button class="arrow-btn" style="width:38px;height:38px;font-size:1rem" onclick="${onRight}">▶</button>`;
+  html += `</div>`;
+
+  // Value
+  html += `<div style="font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:${color};margin-top:4px">= ${fmtN(value)}</div>`;
+
+  html += `</div>`;
+  return html;
+}
+
+function renderStrategy() {
+  const ws = document.getElementById('strategyWorkspace');
+  const curA = applyOffset(baseA, sA);
+  const curB = applyOffset(baseB, sB);
+  const trueAnswer = stratOp === '+' ? round14(baseA + baseB) : round14(baseA - baseB);
+  const opSym = stratOp === '+' ? '+' : '−';
+
+  let html = '';
+
+  // ---- A op B with controls ----
+  html += `<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;align-items:flex-start;margin-bottom:16px">`;
+  html += buildNumberDisplay(curA, `shiftNum('A',-1)`, `shiftNum('A',1)`, 'Number A', 'var(--accent)', sA);
+  html += `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:36px">
+    <span style="font-size:1.8rem;color:var(--accent2);font-weight:900">${opSym}</span>
+  </div>`;
+  html += buildNumberDisplay(curB, `shiftNum('B',-1)`, `shiftNum('B',1)`, 'Number B', 'var(--accent2)', sB);
+  html += `</div>`;
+
+  // ---- Hint / Input ----
+  if (!sumDone) {
+    if (sA !== 0 && sA === sB) {
+      html += `<div class="explanation" style="margin-bottom:14px;text-align:center">
+        ✓ Both moved the same way — now what is <strong>${fmtN(curA)} ${opSym} ${fmtN(curB)}</strong>?
+      </div>`;
+    } else if (sA !== 0 || sB !== 0) {
+      html += `<div class="explanation" style="margin-bottom:14px;text-align:center;border-left-color:var(--accent3)">
+        Try moving both numbers the same number of places in the same direction to make them easier to calculate.
+      </div>`;
+    } else {
+      html += `<div class="explanation" style="margin-bottom:14px;text-align:center">
+        Use ◀ ▶ to slide each decimal point. Try moving both left the same number of times!
+      </div>`;
+    }
+
+    html += `<div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:4px">
+      <span style="font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--text)">${fmtN(curA)} ${opSym} ${fmtN(curB)} =</span>
+      <input id="sumInput" type="number" placeholder="?"
+        style="width:110px;font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;text-align:center;
+               background:var(--digit-bg);border:2px solid ${sumEntryWrong ? 'var(--accent3)' : 'var(--accent)'};
+               color:var(--text);border-radius:8px;padding:8px;outline:none;"
+        onkeydown="if(event.key==='Enter')trySum()">
+      <button class="step-btn" style="margin-top:0;font-size:1rem;padding:10px 18px" onclick="trySum()">✓ Check</button>
+    </div>
+    ${sumEntryWrong ? `<div style="text-align:center;font-size:0.85rem;color:var(--accent3);margin-top:6px">Not quite — try again! 🤔</div>` : ''}`;
+  }
+
+  // ---- Result ----
+  if (sumDone) {
+    const rawSum = window._sumBase;
+    const displayResult = applyOffset(rawSum, sResult);
+    const isCorrect = Math.abs(displayResult - trueAnswer) < 1e-9;
+    const needsRight = displayResult < trueAnswer;
+
+    // Check if result can ever reach the true answer by shifting
+    // Special case: if trueAnswer is 0, displayResult is already 0 (correct) or rawSum is 0
+    const ratio = trueAnswer / rawSum;
+    const logRatio = Math.log10(Math.abs(ratio));
+    const isRecoverable = trueAnswer === 0 || rawSum === 0 || Math.abs(logRatio - Math.round(logRatio)) < 0.001;
+
+    html += `<div style="border-top:1px solid #2a2d3e;padding-top:16px;margin-top:8px">`;
+    html += `<div style="text-align:center;font-size:0.78rem;color:var(--muted);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase">Step 3 — Restore the decimal</div>`;
+
+    if (!isRecoverable && !isCorrect) {
+      html += `<div style="background:rgba(240,192,64,0.1);border:2px solid rgba(240,192,64,0.4);border-radius:12px;padding:14px 16px;margin-bottom:12px;text-align:center">
+        <div style="font-size:1.2rem;margin-bottom:6px">⚠️ Oops — A and B weren't moved the same amount!</div>
+        <div style="font-size:0.9rem;color:#e0d090;margin-bottom:12px">Move both decimals the same number of places, then try again.</div>
+        <button class="step-btn" onclick="sumDone=false;sA=0;sB=0;sResult=0;sumEntryWrong=false;renderStrategy()">↩ Go back and fix it</button>
+      </div>`;
+    } else {
+      if (!isCorrect) {
+        const movesNeeded = (trueAnswer === 0 || displayResult === 0) ? 0 : Math.round(Math.log10(Math.abs(trueAnswer / displayResult)));
+        const dirWord = needsRight ? 'right' : 'left';
+        const dirArrow = needsRight ? '▶' : '◀';
+        const arrows = movesNeeded > 0 ? Array(movesNeeded).fill(dirArrow).join('') : dirArrow;
+        html += `<div class="explanation" style="margin-bottom:16px;text-align:center">
+          Great! Now restore the decimal to its original position by shifting it ${dirWord} <strong>${arrows}</strong>
+        </div>`;
+      }
+
+      html += `<div style="display:flex;justify-content:center;gap:20px;align-items:flex-start;flex-wrap:wrap">`;
+      html += `<div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+        <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">You got</div>
+        <div style="font-family:'Space Mono',monospace;font-size:1.4rem;color:#8080a0;padding:10px 16px;background:var(--digit-bg);border-radius:10px;border:2px solid #353852">${fmtN(rawSum)}</div>
+      </div>`;
+      html += `<div style="padding-top:28px;font-size:1.2rem;color:var(--accent2)">→</div>`;
+      html += buildNumberDisplay(displayResult, `shiftNum('R',-1)`, `shiftNum('R',1)`, 'Move decimal to restore', 'var(--accent)', sResult);
+      html += `</div>`;
+
+      if (isCorrect) {
+        html += `<div style="text-align:center;margin-top:14px;padding:14px;background:rgba(40,180,80,0.1);border-radius:12px;border:2px solid rgba(40,180,80,0.3)">
+          <div style="font-size:1.4rem;margin-bottom:4px">🎉</div>
+          <div style="font-family:'Space Mono',monospace;font-weight:700;color:#50e090;font-size:1.1rem">${fmtN(baseA)} ${opSym} ${fmtN(baseB)} = ${fmtN(trueAnswer)}</div>
+          <div style="font-size:0.82rem;color:#50e090;margin-top:4px;opacity:0.8">You restored the decimal perfectly!</div>
+        </div>`;
+      }
+
+      html += `<div style="text-align:center;margin-top:12px">
+        <button class="reset-btn" onclick="sumDone=false;sResult=0;sumEntryWrong=false;renderStrategy()">↩ Try again</button>
+      </div>`;
+    }
+
+    html += `</div>`;
+  }
+
+  html += `<div style="text-align:center;margin-top:10px">
+    <button class="reset-btn" onclick="resetStrategy()">↺ Start over</button>
+  </div>`;
+
+  ws.innerHTML = html;
+}
+
+function resetStrategy() {
+  initStrategy();
+}
+
+// ============================
+// PERSISTENT HISTORY (localStorage)
+// ============================
+
+const HISTORY_KEY = 'dt-challenge-history';
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) {
+    return [];
+  }
+}
+
+function saveRun(run) {
+  try {
+    const history = loadHistory();
+    history.unshift(run);
+    if (history.length > 20) history.length = 20;
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch(e) {}
+}
+
+function clearHistory() {
+  try {
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistoryPanel([]);
+  } catch(e) {}
+}
+
+function renderHistoryPanel(preloaded) {
+  const el = document.getElementById('cq-history-lines');
+  if (!el) return;
+  const history = preloaded !== undefined ? preloaded : loadHistory();
+  if (!history || history.length === 0) {
+    el.innerHTML = `<div style="color:var(--muted);font-style:italic;font-size:0.9rem;font-family:'Crimson Text',serif">No attempts yet — complete a challenge to record your first entry!</div>`;
+    return;
+  }
+  el.innerHTML = history.map((run, ri) => {
+    const date = new Date(run.date);
+    const dateStr = date.toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
+    const timeStr = date.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
+    const pct = Math.round((run.correct / run.total) * 100);
+    const medal = pct === 100 ? '🏆' : pct >= 70 ? '🌟' : pct >= 50 ? '👍' : '💪';
+    const modeLabel = run.mode === 'addition' ? '＋' : run.mode === 'subtraction' ? '－' : '＋／－';
+
+    const questionsHtml = run.questions.map(q => {
+      const icon = q.correct ? '✅' : '❌';
+      const opSym = q.op === '-' ? '−' : '+';
+      const col = q.correct ? '#50e090' : 'var(--accent3)';
+      return `<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+        <span style="flex-shrink:0">${icon}</span>
+        <span style="font-family:'Space Mono',monospace;font-size:0.8rem;color:var(--text)">${q.a} ${opSym} ${q.b}</span>
+        <span style="font-size:0.75rem;color:var(--muted)">→</span>
+        <span style="font-family:'Space Mono',monospace;font-size:0.8rem;color:${col};font-weight:700">${fmtN(q.userAnswer)}</span>
+        ${!q.correct ? `<span style="font-size:0.72rem;color:var(--muted)">(✓ ${q.answer})</span>` : ''}
+      </div>`;
+    }).join('');
+
+    const isFirst = ri === 0;
+    return `<details ${isFirst ? 'open' : ''} style="margin-bottom:10px;border:1px solid var(--border);border-radius:6px;overflow:hidden">
+      <summary style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;background:var(--digit-bg);list-style:none;flex-wrap:wrap;gap:8px">
+        <span style="font-size:1.1rem">${medal}</span>
+        <span style="font-family:'Cinzel',serif;font-size:0.82rem;color:var(--accent);font-weight:700">${run.correct}/${run.total} correct</span>
+        <span style="font-size:0.75rem;color:var(--muted);font-family:'Cinzel',serif">${modeLabel}</span>
+        <span style="flex:1"></span>
+        <span style="font-size:0.72rem;color:var(--muted);font-family:'Crimson Text',serif;font-style:italic">${dateStr} · ${timeStr}</span>
+      </summary>
+      <div style="padding:10px 14px;background:var(--panel2)">
+        ${questionsHtml}
+      </div>
+    </details>`;
+  }).join('');
+}
+
+// ============================
+// TASK 3 — CHALLENGE MODE
+// ============================
+
+const CHALLENGE_TOTAL = 10;
+let cqMode = 'addition'; // 'addition' | 'subtraction' | 'mixed'
+
+function setCqMode(mode) {
+  cqMode = mode;
+  ['addition','subtraction','mixed'].forEach(m => {
+    document.getElementById(`cqBtn-${m}`).classList.toggle('active-op', m === mode);
+  });
+}
+
+// Question bank generator
+function generateQuestion(index) {
+  const pools = [
+    () => { const a = pick([20,30,40,50,60,70,80,90]); const b = pick([20,30,40,50,60,70,80,90]); return {a, b}; },
+    () => { const a = pick([100,200,300,400,500]); const b = pick([100,200,300,400,500]); return {a, b}; },
+    () => { const a = pick([150,250,350,450]); const b = pick([50,100,150,200]); return {a, b}; },
+    () => { const a = pick([300,400,500,600]); const b = pick([30,40,50,60]); return {a, b}; },
+  ];
+  const fn = pools[index % pools.length];
+  const {a, b} = fn();
+
+  let op;
+  if (cqMode === 'addition') op = '+';
+  else if (cqMode === 'subtraction') op = '-';
+  else op = Math.random() < 0.5 ? '+' : '-';
+
+  // For subtraction ensure a >= b to keep answer positive
+  const bigA = op === '-' ? Math.max(a, b) : a;
+  const bigB = op === '-' ? Math.min(a, b) : b;
+  const answer = op === '+' ? round14(bigA + bigB) : round14(bigA - bigB);
+  return { a: bigA, b: bigB, op, answer };
+}
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// Challenge state
+let cqList = [];       // array of {a, b, answer}
+let cqIndex = 0;       // current question (0-9)
+let cqCorrect = 0;
+let cqWrong = 0;
+let cqLog = [];        // {qNum, a, b, answer, userAnswer, correct}
+
+// Per-question shift state
+let cqSA = 0, cqSB = 0, cqSResult = 0;
+let cqSumDone = false;
+let cqSumBase = null;
+let cqAnswered = false;
+let cqSumEntryWrong = false;
+
+function startChallenge() {
+  cqList = [];
+  for (let i = 0; i < CHALLENGE_TOTAL; i++) cqList.push(generateQuestion(i));
+  cqIndex = 0;
+  cqCorrect = 0;
+  cqWrong = 0;
+  cqLog = [];
+  updateChallengeScore();
+  document.getElementById('cq-log').style.display = 'none';
+  document.getElementById('cq-log-lines').innerHTML = '';
+  loadChallengeQuestion();
+}
+
+function loadChallengeQuestion() {
+  cqSA = 0; cqSB = 0; cqSResult = 0;
+  cqSumDone = false;
+  cqSumBase = null;
+  cqAnswered = false;
+  cqSumEntryWrong = false;
+  document.getElementById('cq-num').textContent = `${cqIndex + 1} / ${CHALLENGE_TOTAL}`;
+  renderChallenge();
+}
+
+function updateChallengeScore() {
+  document.getElementById('cq-correct').textContent = cqCorrect;
+  document.getElementById('cq-wrong').textContent = cqWrong;
+}
+
+function cqShift(which, dir) {
+  if (cqAnswered) return;
+  if (which === 'A') cqSA += dir;
+  else if (which === 'B') cqSB += dir;
+  else if (which === 'R') cqSResult += dir;
+  renderChallenge();
+}
+
+function cqTrySum() {
+  if (cqSumDone || cqAnswered) return;
+  const input = document.getElementById('cqSumInput');
+  const userVal = parseFloat(input.value);
+  const q = cqList[cqIndex];
+  const curA = applyOffset(q.a, cqSA);
+  const curB = applyOffset(q.b, cqSB);
+  const correctSum = q.op === '+' ? round14(curA + curB) : round14(curA - curB);
+  if (isNaN(userVal) || Math.abs(userVal - correctSum) > 1e-9) {
+    cqSumEntryWrong = true;
+    renderChallenge();
+    return;
+  }
+  cqSumEntryWrong = false;
+  cqSumBase = correctSum;
+  cqSumDone = true;
+  cqSResult = 0;
+  renderChallenge();
+}
+
+function cqDoAdd() {
+  cqTrySum();
+}
+
+function cqSubmit() {
+  if (!cqSumDone || cqAnswered) return;
+  const q = cqList[cqIndex];
+  const displayResult = applyOffset(cqSumBase, cqSResult);
+  const isCorrect = Math.abs(displayResult - q.answer) < 1e-9;
+  cqAnswered = true;
+  if (isCorrect) cqCorrect++; else cqWrong++;
+  cqLog.push({ qNum: cqIndex + 1, a: q.a, b: q.b, op: q.op, answer: q.answer, userAnswer: displayResult, correct: isCorrect });
+  updateChallengeScore();
+  renderChallenge();
+  renderChallengeLog();
+}
+
+function cqNext() {
+  cqIndex++;
+  if (cqIndex >= CHALLENGE_TOTAL) {
+    showChallengeComplete();
+  } else {
+    loadChallengeQuestion();
+  }
+}
+
+function showChallengeComplete() {
+  const ws = document.getElementById('cq-workspace');
+  const pct = Math.round((cqCorrect / CHALLENGE_TOTAL) * 100);
+  let emoji = pct === 100 ? '🏆' : pct >= 70 ? '🌟' : pct >= 50 ? '👍' : '💪';
+  let msg = pct === 100 ? 'Perfect score!' : pct >= 70 ? 'Great work!' : pct >= 50 ? 'Good effort!' : 'Keep practicing!';
+  ws.innerHTML = `
+    <div style="text-align:center;padding:24px 16px">
+      <div style="font-size:3rem;margin-bottom:12px">${emoji}</div>
+      <div style="font-family:'Cinzel',serif;font-size:1.5rem;color:var(--accent);font-weight:700;margin-bottom:6px">${msg}</div>
+      <div style="font-size:1rem;color:var(--muted);margin-bottom:20px">You got <strong style="color:#50e090">${cqCorrect}</strong> out of <strong style="color:var(--accent)">${CHALLENGE_TOTAL}</strong> correct (${pct}%)</div>
+      <button class="step-btn" style="font-size:1rem;padding:12px 28px" onclick="startChallenge()">Try Again 🔄</button>
+    </div>`;
+  document.getElementById('cq-num').textContent = 'Done!';
+
+  // Save to persistent history
+  const run = {
+    date: Date.now(),
+    correct: cqCorrect,
+    total: CHALLENGE_TOTAL,
+    mode: cqMode,
+    questions: cqLog.map(e => ({ a: e.a, b: e.b, op: e.op, answer: e.answer, userAnswer: e.userAnswer, correct: e.correct }))
+  };
+  saveRun(run);
+  renderHistoryPanel();
+}
+
+function renderChallengeLog() {
+  const logEl = document.getElementById('cq-log');
+  const lines = document.getElementById('cq-log-lines');
+  logEl.style.display = 'block';
+  lines.innerHTML = cqLog.map(entry => {
+    const icon = entry.correct ? '✅' : '❌';
+    const answerColor = entry.correct ? '#50e090' : 'var(--accent3)';
+    const entryOp = entry.op === '-' ? '−' : '+';
+    return `<div style="display:flex;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px solid #2a2d3e;flex-wrap:wrap">
+      <span style="font-size:1rem;flex-shrink:0">${icon}</span>
+      <span style="font-family:'Space Mono',monospace;font-size:0.82rem;color:var(--muted);flex-shrink:0">Q${entry.qNum}:</span>
+      <span style="font-family:'Space Mono',monospace;font-size:0.88rem;color:var(--text)">${entry.a} ${entryOp} ${entry.b}</span>
+      <span style="color:var(--muted);font-size:0.82rem">→ your answer:</span>
+      <span style="font-family:'Space Mono',monospace;font-size:0.88rem;color:${answerColor};font-weight:700">${fmtN(entry.userAnswer)}</span>
+      ${!entry.correct ? `<span style="color:var(--muted);font-size:0.78rem">(correct: ${entry.answer})</span>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function renderChallenge() {
+  const ws = document.getElementById('cq-workspace');
+  if (cqIndex >= CHALLENGE_TOTAL) return;
+  const q = cqList[cqIndex];
+  const curA = applyOffset(q.a, cqSA);
+  const curB = applyOffset(q.b, cqSB);
+  const trueAnswer = q.answer;
+
+  let html = '';
+
+  // Question header
+  const qOpSym = q.op === '+' ? '+' : '−';
+  html += `<div style="text-align:center;margin-bottom:16px">
+    <div style="font-size:0.75rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Question ${cqIndex+1} of ${CHALLENGE_TOTAL}</div>
+    <div style="font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--text)">
+      <span style="color:var(--accent)">${q.a}</span>
+      <span style="color:var(--accent2);margin:0 10px">${qOpSym}</span>
+      <span style="color:var(--accent2)">${q.b}</span>
+      <span style="color:var(--muted);margin:0 10px">=</span>
+      <span style="color:var(--muted)">?</span>
+    </div>
+    <div style="font-size:0.82rem;color:var(--muted);margin-top:8px">Use the decimal strategy to find the answer</div>
+  </div>`;
+
+  if (!cqAnswered) {
+    // Step 1 & 2: shift A and B, then calculate
+    if (!cqSumDone) {
+      html += `<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;align-items:flex-start;margin-bottom:14px">`;
+      html += buildNumberDisplay(curA, `cqShift('A',-1)`, `cqShift('A',1)`, 'Number A', 'var(--accent)', cqSA);
+      html += `<div style="padding-top:36px;font-size:1.8rem;color:var(--accent2);font-weight:900">${qOpSym}</div>`;
+      html += buildNumberDisplay(curB, `cqShift('B',-1)`, `cqShift('B',1)`, 'Number B', 'var(--accent2)', cqSB);
+      html += `</div>`;
+
+      if (cqSA !== 0 && cqSA === cqSB) {
+        html += `<div class="explanation" style="margin-bottom:12px;text-align:center">✓ Both shifted the same way — now what is <strong>${fmtN(curA)} ${qOpSym} ${fmtN(curB)}</strong>?</div>`;
+      } else if (cqSA !== 0 || cqSB !== 0) {
+        html += `<div class="explanation" style="margin-bottom:12px;text-align:center;border-left-color:var(--accent3)">Try moving both numbers the same number of places in the same direction.</div>`;
+      } else {
+        html += `<div class="explanation" style="margin-bottom:12px;text-align:center">Shift each decimal left with ◀ to make the numbers easier to calculate.</div>`;
+      }
+
+      html += `<div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:4px">
+        <span style="font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--text)">${fmtN(curA)} ${qOpSym} ${fmtN(curB)} =</span>
+        <input id="cqSumInput" type="number" placeholder="?"
+          style="width:110px;font-family:'Space Mono',monospace;font-size:1.5rem;font-weight:700;text-align:center;
+                 background:var(--digit-bg);border:2px solid ${cqSumEntryWrong ? 'var(--accent3)' : 'var(--accent)'};
+                 color:var(--text);border-radius:8px;padding:8px;outline:none;"
+          onkeydown="if(event.key==='Enter')cqTrySum()">
+        <button class="step-btn" style="margin-top:0;font-size:1rem;padding:10px 18px" onclick="cqTrySum()">✓ Check</button>
+      </div>
+      ${cqSumEntryWrong ? `<div style="text-align:center;font-size:0.85rem;color:var(--accent3);margin-top:6px">Not quite — try again! 🤔</div>` : ''}`;
+
+    } else {
+      // Step 3: restore
+      const displayResult = applyOffset(cqSumBase, cqSResult);
+      const isRestored = Math.abs(displayResult - trueAnswer) < 1e-9;
+      const needsRight = displayResult < trueAnswer;
+
+      // Detect unrecoverable: A and B were shifted by different amounts,
+      // so no integer number of decimal shifts on the result can reach trueAnswer.
+      // Special case: trueAnswer === 0 means any shift of 0 is correct already.
+      const ratio = trueAnswer / cqSumBase;
+      const logRatio = Math.log10(Math.abs(ratio));
+      const isRecoverable = trueAnswer === 0 || cqSumBase === 0 || Math.abs(logRatio - Math.round(logRatio)) < 0.001;
+
+      html += `<div style="border-bottom:1px solid #2a2d3e;padding-bottom:14px;margin-bottom:14px">`;
+      html += `<div style="text-align:center;font-size:0.78rem;color:var(--muted);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase">Step 3 — Restore the decimal</div>`;
+
+      if (!isRecoverable) {
+        // Show the rescue banner — can't fix this with decimal shifting
+        html += `<div style="background:rgba(240,192,64,0.1);border:2px solid rgba(240,192,64,0.4);border-radius:12px;padding:14px 16px;margin-bottom:14px;text-align:center">
+          <div style="font-size:1.2rem;margin-bottom:6px">⚠️ Oops — A and B weren't moved the same amount!</div>
+          <div style="font-size:0.9rem;color:#e0d090;margin-bottom:12px">Move both decimals the same number of places, then try again.</div>
+          <button class="step-btn" style="background:var(--accent);color:var(--bg)" onclick="cqSumDone=false;cqSA=0;cqSB=0;cqSResult=0;cqSumBase=null;cqSumEntryWrong=false;renderChallenge()">
+            ↩ Go back and fix it
+          </button>
+        </div>`;
+      } else {
+        if (!isRestored) {
+          const movesNeeded = (trueAnswer === 0 || displayResult === 0) ? 0 : Math.round(Math.log10(Math.abs(trueAnswer / displayResult)));
+          const dirWord = needsRight ? 'right' : 'left';
+          const dirArrow = needsRight ? '▶' : '◀';
+          const arrows = movesNeeded > 0 ? Array(movesNeeded).fill(dirArrow).join('') : dirArrow;
+          html += `<div class="explanation" style="margin-bottom:14px;text-align:center">
+            Great! Now restore the decimal to its original position by shifting it ${dirWord} <strong>${arrows}</strong>
+          </div>`;
+        }
+
+        html += `<div style="display:flex;justify-content:center;gap:20px;align-items:flex-start;flex-wrap:wrap">`;
+        html += `<div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">You got</div>
+          <div style="font-family:'Space Mono',monospace;font-size:1.4rem;color:#8080a0;padding:10px 16px;background:var(--digit-bg);border-radius:10px;border:2px solid #353852">${fmtN(cqSumBase)}</div>
+        </div>`;
+        html += `<div style="padding-top:28px;font-size:1.2rem;color:var(--accent2)">→</div>`;
+        html += buildNumberDisplay(displayResult, `cqShift('R',-1)`, `cqShift('R',1)`, 'Shift to restore', 'var(--accent)', cqSResult);
+        html += `</div>`;
+
+        // Submit button
+        html += `<div style="text-align:center;margin-top:14px;margin-bottom:4px">
+          <button class="step-btn" ${isRestored ? '' : 'style="opacity:0.4;cursor:default"'} onclick="${isRestored ? 'cqSubmit()' : ''}">
+            ${isRestored ? '✅ Submit Answer' : 'Keep restoring the decimal…'}
+          </button>
+        </div>`;
+
+        html += `<div style="text-align:center;margin-top:6px">
+          <button class="reset-btn" onclick="cqSumDone=false;cqSResult=0;cqSumBase=null;cqSumEntryWrong=false;renderChallenge()">↩ Re-do addition</button>
+        </div>`;
+      }
+
+      html += `</div>`;
+    }
+
+  } else {
+    // Show result after answering
+    const displayResult = applyOffset(cqSumBase, cqSResult);
+    const isCorrect = Math.abs(displayResult - trueAnswer) < 1e-9;
+
+    if (isCorrect) {
+      html += `<div style="text-align:center;padding:16px;background:rgba(40,180,80,0.1);border-radius:12px;border:2px solid rgba(40,180,80,0.3);margin-bottom:16px">
+        <div style="font-size:1.6rem;margin-bottom:8px">🎉</div>
+        <div style="font-family:'Space Mono',monospace;font-weight:700;color:#50e090;font-size:1.8rem">${q.a} ${qOpSym} ${q.b} = ${trueAnswer}</div>
+        <div style="font-size:0.88rem;color:#50e090;margin-top:6px;opacity:0.8">Correct! Great work.</div>
+      </div>`;
+    } else {
+      // Figure out what went wrong — how far off is the decimal?
+      const placesOff = (trueAnswer === 0 || displayResult === 0) ? 0 : Math.round(Math.log10(Math.abs(trueAnswer / displayResult)));
+      const tooSmall = displayResult < trueAnswer;
+      const dirWord = tooSmall ? 'right ▶' : 'left ◀';
+      const placesWord = Math.abs(placesOff) === 1 ? '1 place' : `${Math.abs(placesOff)} places`;
+
+      html += `
+        <!-- Big clear "not quite" header -->
+        <div style="text-align:center;padding:14px 16px 10px;background:rgba(240,64,144,0.08);border-radius:12px 12px 0 0;border:2px solid rgba(240,64,144,0.25);border-bottom:none;margin-bottom:0">
+          <div style="font-size:1.5rem;margin-bottom:4px">🤔 Not quite!</div>
+          <div style="font-size:0.95rem;color:#e0b0c0">The decimal point ended up in the wrong spot.</div>
+        </div>
+
+        <!-- Side-by-side your answer vs correct -->
+        <div style="display:flex;justify-content:center;gap:0;margin-bottom:0">
+          <div style="flex:1;text-align:center;padding:14px 12px;background:rgba(240,64,144,0.06);border:2px solid rgba(240,64,144,0.25);border-top:none;border-right:1px solid rgba(240,64,144,0.15);border-radius:0 0 0 12px">
+            <div style="font-size:0.7rem;color:var(--accent3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Your answer</div>
+            <div style="font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:var(--accent3)">${fmtN(displayResult)}</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:14px 12px;background:rgba(40,180,80,0.08);border:2px solid rgba(40,180,80,0.3);border-top:none;border-left:none;border-radius:0 0 12px 0">
+            <div style="font-size:0.7rem;color:#50e090;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Correct answer</div>
+            <div style="font-family:'Space Mono',monospace;font-size:1.6rem;font-weight:700;color:#50e090">${trueAnswer}</div>
+          </div>
+        </div>
+
+        <!-- Plain-language explanation -->
+        <div class="explanation" style="margin-top:14px;margin-bottom:16px;border-left-color:var(--accent)">
+          The answer was <strong style="color:var(--accent)">${trueAnswer}</strong>, not <strong style="color:var(--accent3)">${fmtN(displayResult)}</strong>. 
+          When you shifted the decimal back, it needed to go <strong>${dirWord}</strong> by <strong>${placesWord}</strong> more. 
+          Try moving the decimal the same number of places back as you moved it at the start!
+        </div>`;
+    }
+
+    const isLast = cqIndex >= CHALLENGE_TOTAL - 1;
+    html += `<div style="text-align:center">
+      <button class="step-btn" style="font-size:1rem;padding:10px 24px" onclick="${isLast ? 'showChallengeComplete()' : 'cqNext()'}">
+        ${isLast ? 'See Final Score 🏆' : 'Next Question →'}
+      </button>
+    </div>`;
+  }
+
+  ws.innerHTML = html;
+}
+
+
+function switchTab(idx) {
+  document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  if (idx === 2) renderHistoryPanel(); // refresh history when opening challenge tab
+}
+
+// ============================
+// INIT
+// ============================
+initTask1();
+initStrategy();
+renderHistoryPanel(); // load saved history on startup
+</script>
+</body>
+</html>
