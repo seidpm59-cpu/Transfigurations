@@ -654,7 +654,10 @@
     <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
       <button id="cqBtn-addition" class="op-toggle active-op" onclick="setCqMode('addition')">＋ Addition</button>
       <button id="cqBtn-subtraction" class="op-toggle" onclick="setCqMode('subtraction')">－ Subtraction</button>
+      <button id="cqBtn-multiplication" class="op-toggle" onclick="setCqMode('multiplication')">× Multiplication</button>
+      <button id="cqBtn-division" class="op-toggle" onclick="setCqMode('division')">÷ Division</button>
       <button id="cqBtn-mixed" class="op-toggle" onclick="setCqMode('mixed')">＋／－ Mixed</button>
+      <button id="cqBtn-mixedAll" class="op-toggle" onclick="setCqMode('mixedAll')">✦ All Ops Mixed</button>
     </div>
   </div>
   <div class="card" id="cq-workspace">
@@ -1028,9 +1031,13 @@ function renderStrategy() {
           ✓ Your shifts cancel out — now what is <strong>${fmtN(curA)} ${opSym} ${fmtN(curB)}</strong>?
         </div>`;
       } else if (sA !== 0 || sB !== 0) {
+        const netShift = sA + sB;
+        const absNet = Math.abs(netShift);
+        const netDir = netShift > 0 ? 'right' : 'left';
+        const netDirBack = netShift > 0 ? 'left' : 'right';
         html += `<div class="explanation" style="margin-bottom:14px;text-align:center;border-left-color:var(--teal)">
-          Net shift so far: <strong style="color:var(--teal)">${netShift > 0 ? '+' : ''}${netShift}</strong> places. 
-          When you're ready to calculate, enter the product below. You'll shift the result back by <strong>${netShift > 0 ? '+' : ''}${netShift}</strong>.
+          You moved the decimal <strong>${absNet} place${absNet !== 1 ? 's' : ''} to the ${netDir}</strong>. 
+          When you're ready to calculate, enter the product below. You'll shift the result back <strong>${absNet} place${absNet !== 1 ? 's' : ''} to the ${netDirBack}</strong>.
         </div>`;
       }
     } else if (stratOp === '/') {
@@ -1077,7 +1084,9 @@ function renderStrategy() {
     if (stratOp === '/') restoreLabel = 'Step 3 — Check your answer (no restore needed for equal shifts!)';
     if (stratOp === '*') {
       const netShift = sA + sB;
-      restoreLabel = `Step 3 — Restore the decimal (shift result by ${netShift > 0 ? '+' : ''}${netShift === 0 ? '0' : netShift})`;
+      const absNet = Math.abs(netShift);
+      const netDirBack = netShift > 0 ? 'left' : 'right';
+      restoreLabel = `Step 3 — Restore the decimal (shift result ${absNet} place${absNet !== 1 ? 's' : ''} to the ${netDirBack})`;
     }
     html += `<div style="text-align:center;font-size:0.78rem;color:var(--muted);margin-bottom:10px;letter-spacing:1px;text-transform:uppercase">${restoreLabel}</div>`;
 
@@ -1163,10 +1172,10 @@ function renderHistoryPanel(preloaded) {
     const timeStr = date.toLocaleTimeString(undefined, { hour:'2-digit', minute:'2-digit' });
     const pct = Math.round((run.correct / run.total) * 100);
     const medal = pct === 100 ? '🏆' : pct >= 70 ? '🌟' : pct >= 50 ? '👍' : '💪';
-    const modeLabel = run.mode === 'addition' ? '＋' : run.mode === 'subtraction' ? '－' : '＋／－';
+    const modeLabel = run.mode === 'addition' ? '＋' : run.mode === 'subtraction' ? '－' : run.mode === 'multiplication' ? '×' : run.mode === 'division' ? '÷' : run.mode === 'mixed' ? '＋／－' : '✦ All';
     const questionsHtml = run.questions.map(q => {
       const icon = q.correct ? '✅' : '❌';
-      const opSym = q.op === '-' ? '−' : '+';
+      const opSym = q.op === '-' ? '−' : q.op === '*' ? '×' : q.op === '/' ? '÷' : '+';
       const col = q.correct ? '#50e090' : 'var(--accent3)';
       return `<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
         <span style="flex-shrink:0">${icon}</span>
@@ -1197,26 +1206,48 @@ const CHALLENGE_TOTAL = 10;
 let cqMode = 'addition';
 function setCqMode(mode) {
   cqMode = mode;
-  ['addition','subtraction','mixed'].forEach(m => {
+  ['addition','subtraction','multiplication','division','mixed','mixedAll'].forEach(m => {
     document.getElementById(`cqBtn-${m}`).classList.toggle('active-op', m === mode);
   });
 }
 function generateQuestion(index) {
-  const pools = [
+  // Number pools — mul/div use smaller numbers to keep answers manageable
+  const addSubPools = [
     () => { const a = pick([20,30,40,50,60,70,80,90]); const b = pick([20,30,40,50,60,70,80,90]); return {a, b}; },
     () => { const a = pick([100,200,300,400,500]); const b = pick([100,200,300,400,500]); return {a, b}; },
     () => { const a = pick([150,250,350,450]); const b = pick([50,100,150,200]); return {a, b}; },
     () => { const a = pick([300,400,500,600]); const b = pick([30,40,50,60]); return {a, b}; },
   ];
-  const fn = pools[index % pools.length];
-  const {a, b} = fn();
+  const mulDivPools = [
+    () => { const a = pick([20,30,40,50]); const b = pick([2,3,4,5]); return {a, b}; },
+    () => { const a = pick([60,70,80,90]); const b = pick([2,3,4,5]); return {a, b}; },
+    () => { const a = pick([100,200,300]); const b = pick([2,4,5,10]); return {a, b}; },
+    () => { const a = pick([120,150,200,250]); const b = pick([2,3,5,10]); return {a, b}; },
+  ];
+
   let op;
-  if (cqMode === 'addition') op = '+';
-  else if (cqMode === 'subtraction') op = '-';
-  else op = Math.random() < 0.5 ? '+' : '-';
-  const bigA = op === '-' ? Math.max(a, b) : a;
-  const bigB = op === '-' ? Math.min(a, b) : b;
-  const answer = op === '+' ? round14(bigA + bigB) : round14(bigA - bigB);
+  if (cqMode === 'addition')       op = '+';
+  else if (cqMode === 'subtraction')  op = '-';
+  else if (cqMode === 'multiplication') op = '*';
+  else if (cqMode === 'division')     op = '/';
+  else if (cqMode === 'mixed')        op = Math.random() < 0.5 ? '+' : '-';
+  else /* mixedAll */                 op = pick(['+', '-', '*', '/']);
+
+  const isMul = op === '*', isDiv = op === '/';
+  const pool = (isMul || isDiv) ? mulDivPools[index % mulDivPools.length] : addSubPools[index % addSubPools.length];
+  const {a, b} = pool();
+
+  let bigA = a, bigB = b;
+  if (op === '-') { bigA = Math.max(a, b); bigB = Math.min(a, b); }
+  if (op === '/') {
+    // Ensure clean integer division: pick a divisor that divides bigA evenly
+    const divisors = [2,3,4,5,10].filter(d => bigA % d === 0);
+    bigB = divisors.length ? pick(divisors) : 2;
+    // Adjust bigA to be divisible if needed
+    if (bigA % bigB !== 0) bigA = bigB * pick([10,20,30,40,50]);
+  }
+
+  const answer = computeOp(bigA, bigB, op);
   return { a: bigA, b: bigB, op, answer };
 }
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -1258,7 +1289,7 @@ function cqTrySum() {
   const q = cqList[cqIndex];
   const curA = applyOffset(q.a, cqSA);
   const curB = applyOffset(q.b, cqSB);
-  const correctSum = q.op === '+' ? round14(curA + curB) : round14(curA - curB);
+  const correctSum = computeOp(curA, curB, q.op);
   if (isNaN(userVal) || Math.abs(userVal - correctSum) > 1e-9) {
     cqSumEntryWrong = true;
     renderChallenge();
@@ -1314,7 +1345,7 @@ function renderChallengeLog() {
   lines.innerHTML = cqLog.map(entry => {
     const icon = entry.correct ? '✅' : '❌';
     const answerColor = entry.correct ? '#50e090' : 'var(--accent3)';
-    const entryOp = entry.op === '-' ? '−' : '+';
+    const entryOp = entry.op === '-' ? '−' : entry.op === '*' ? '×' : entry.op === '/' ? '÷' : '+';
     return `<div style="display:flex;align-items:baseline;gap:10px;padding:7px 0;border-bottom:1px solid #2a2d3e;flex-wrap:wrap">
       <span style="font-size:1rem;flex-shrink:0">${icon}</span>
       <span style="font-family:'Space Mono',monospace;font-size:0.82rem;color:var(--muted);flex-shrink:0">Q${entry.qNum}:</span>
