@@ -567,14 +567,14 @@
     <div class="number-picker" style="margin-bottom:0">
       <div class="picker-group">
         <div class="picker-label">Number A</div>
-        <input class="picker-input" id="numA" type="number" value="50" oninput="initStrategy()">
+        <input class="picker-input" id="numA" type="number" value="50" onchange="initStrategy()">
       </div>
       <div class="picker-group" style="justify-content:center;padding-top:22px">
         <span id="opSymbol" style="font-size:1.5rem;color:var(--accent2);font-weight:900">+</span>
       </div>
       <div class="picker-group">
         <div class="picker-label">Number B</div>
-        <input class="picker-input" id="numB" type="number" value="30" oninput="initStrategy()">
+        <input class="picker-input" id="numB" type="number" value="30" onchange="initStrategy()">
       </div>
     </div>
   </div>
@@ -1002,8 +1002,8 @@ function renderStrategy() {
 
   // ---- Hint / Input ----
   if (!sumDone) {
-    // Show mul/div hint always for those ops
-    if (isMulDiv) {
+    // Show mul/div hint only before any shifting has begun
+    if (isMulDiv && sA === 0 && sB === 0) {
       html += mulDivHintBox(stratOp, curA, curB, sA, sB);
     }
 
