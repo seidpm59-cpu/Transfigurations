@@ -883,6 +883,10 @@ function trySum() {
   sumDone = true;
   sResult = 0;
   renderStrategy();
+  setTimeout(() => {
+    const ws = document.getElementById('strategyWorkspace');
+    if (ws) ws.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, 50);
 }
 
 function computeOp(a, b, op) {
@@ -902,6 +906,7 @@ function getTrueAnswer() {
 
 function resetStrategy() {
   initStrategy();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function applyOffset(base, offset) {
