@@ -493,6 +493,196 @@
     line-height: 1.55;
   }
   .mul-div-hint strong { color: var(--teal); }
+
+  /* Make-ten addition spell */
+  .make-ten-board {
+    display: grid;
+    grid-template-columns: repeat(9, minmax(38px, 1fr));
+    gap: 6px;
+    margin-top: 14px;
+  }
+  .make-ten-cell {
+    background: var(--digit-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.92rem;
+    font-weight: 700;
+    min-height: 42px;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.25);
+  }
+  .make-ten-cell:hover {
+    border-color: var(--accent2);
+    color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 0 10px rgba(245,200,66,0.15), inset 0 -2px 0 rgba(0,0,0,0.25);
+  }
+  .make-ten-cell.active-fact {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(78,201,176,0.10);
+    box-shadow: 0 0 12px rgba(78,201,176,0.20);
+  }
+  .make-ten-work {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 14px 0;
+  }
+  .make-ten-token {
+    background: var(--digit-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-width: 72px;
+    padding: 12px 14px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .make-ten-token.glow {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(245,200,66,0.08);
+    box-shadow: 0 0 12px rgba(245,200,66,0.18);
+  }
+  .make-ten-token.ten {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(78,201,176,0.09);
+    box-shadow: 0 0 12px rgba(78,201,176,0.18);
+  }
+  .make-ten-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent2);
+    font-family: 'Space Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    padding: 0 2px;
+  }
+  .ten-frame {
+    display: grid;
+    grid-template-columns: repeat(5, 18px);
+    grid-auto-rows: 18px;
+    gap: 5px;
+    justify-content: center;
+    margin: 10px auto 4px;
+  }
+  .ten-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(138,122,90,0.25);
+    border: 1px solid rgba(245,200,66,0.18);
+  }
+  .ten-dot.filled-a { background: var(--accent); box-shadow: 0 0 7px rgba(245,200,66,0.35); }
+  .ten-dot.filled-move { background: var(--teal); box-shadow: 0 0 7px rgba(78,201,176,0.35); }
+  .leftover-dots { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; min-height:22px; margin-top:8px; }
+  .leftover-dot { width:18px; height:18px; border-radius:50%; background:var(--accent3); box-shadow:0 0 7px rgba(224,92,42,0.25); }
+  .make-ten-transfer {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 14px 0;
+  }
+  .transfer-number {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 150px;
+  }
+  .transfer-value {
+    background: var(--digit-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    width: 92px;
+    height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text);
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3);
+    transition: all 0.25s;
+  }
+  .transfer-value.ten {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(78,201,176,0.10);
+    box-shadow: 0 0 14px rgba(78,201,176,0.22), inset 0 -2px 0 rgba(0,0,0,0.3);
+  }
+  .transfer-label {
+    font-family: 'Cinzel', serif;
+    color: var(--muted);
+    font-size: 0.76rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .transfer-arrows {
+    display: flex;
+    gap: 7px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .transfer-btn {
+    background: var(--digit-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    min-width: 42px;
+    height: 38px;
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .transfer-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(245,200,66,0.10);
+    transform: translateY(-1px);
+    box-shadow: 0 0 10px var(--glow);
+  }
+  .transfer-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+  .transfer-plus {
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace; font-size: 2rem;
+    color: var(--accent2); font-weight: 700; padding-top: 28px;
+  }
+  .transfer-change {
+    min-height: 20px;
+    font-size: 0.8rem;
+    color: var(--teal);
+    font-style: italic;
+    text-align: center;
+  }
+  .transfer-eq {
+    display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap;
+    margin: 16px 0 10px;
+  }
+  .transfer-note {
+    font-size:0.86rem; color:var(--muted); font-style:italic; text-align:center; line-height:1.45;
+  }
+
+  @media (max-width: 500px) {
+    .make-ten-board { grid-template-columns: repeat(3, 1fr); }
+    .make-ten-token { min-width: 58px; font-size: 1.18rem; padding: 10px 10px; }
+    .make-ten-arrow { width: 100%; }
+  }
+
   @media (max-width: 500px) {
     .digit-box { width: 44px; height: 60px; font-size: 1.5rem; }
     .decimal-slot, .drop-zone { width: 16px; }
@@ -541,13 +731,49 @@
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab(0)">✦ Spell I: Strategy</button>
-  <button class="tab-btn" onclick="switchTab(1)">✦ Spell II: Slide</button>
-  <button class="tab-btn" onclick="switchTab(2)">🏆 O.W.L. Exam</button>
+  <button class="tab-btn active" onclick="switchTab(0)">✦ Spell I: Make Ten</button>
+  <button class="tab-btn" onclick="switchTab(1)">✦ Spell II: Strategy</button>
+  <button class="tab-btn" onclick="switchTab(2)">✦ Spell III: Slide</button>
+  <button class="tab-btn" onclick="switchTab(3)">🏆 Spell IV: O.W.L. Exam</button>
 </div>
 
-<!-- ===== TAB 1: STRATEGY ===== -->
+<!-- ===== TAB 1: MAKE TEN ===== -->
 <div class="tab-panel active" id="tab0">
+  <div class="card" style="padding:18px 20px">
+    <div style="color:var(--muted);font-size:0.88rem;line-height:1.6">
+      <strong style="color:var(--accent2)">Make-Ten Spell:</strong> Add by trading between the two numbers without changing the total. Push one number up toward <strong>10</strong> while the other moves down by the same amount: <strong>9 + 4 → 10 + 3 = 13</strong>.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="number-picker" style="margin-bottom:10px">
+      <div class="picker-group">
+        <div class="picker-label">Number A</div>
+        <input class="picker-input" id="mtA" type="number" min="1" max="9" value="9" placeholder="random" oninput="setMakeTenFromInputs()">
+      </div>
+      <div class="picker-group" style="justify-content:center;padding-top:22px">
+        <span style="font-size:1.5rem;color:var(--accent2);font-weight:900">+</span>
+      </div>
+      <div class="picker-group">
+        <div class="picker-label">Number B</div>
+        <input class="picker-input" id="mtB" type="number" min="1" max="9" value="4" placeholder="random" oninput="setMakeTenFromInputs()">
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
+      <button class="step-btn" onclick="randomMakeTenFact()">✨ Random Fact</button>
+      <button class="reset-btn" onclick="setMakeTenFact(9,4)">Show 9 + 4</button>
+      <button class="reset-btn" onclick="resetMakeTenTransfer()">↺ Reset this fact</button>
+    </div>
+    <div class="make-ten-board" id="makeTenBoard"></div>
+  </div>
+
+  <div class="card" id="makeTenWorkspace">
+    <!-- rendered by JS -->
+  </div>
+</div>
+
+<!-- ===== TAB 2: STRATEGY ===== -->
+<div class="tab-panel" id="tab1">
   <!-- Intro -->
   <div class="card" style="padding:18px 20px">
     <div style="color:var(--muted);font-size:0.88rem;line-height:1.6">
@@ -585,8 +811,8 @@
   </div>
 </div>
 
-<!-- ===== TAB 2: SLIDE ===== -->
-<div class="tab-panel" id="tab1">
+<!-- ===== TAB 3: SLIDE ===== -->
+<div class="tab-panel" id="tab2">
   <div class="card">
     <div class="number-display-wrap">
       <div class="number-picker">
@@ -628,8 +854,8 @@
   </div>
 </div>
 
-<!-- ===== TAB 3: CHALLENGE ===== -->
-<div class="tab-panel" id="tab2">
+<!-- ===== TAB 4: CHALLENGE ===== -->
+<div class="tab-panel" id="tab3">
   <div class="card" style="padding:16px 20px">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
       <div style="display:flex;gap:16px">
@@ -682,6 +908,202 @@
 </div>
 
 <script>
+
+// ============================
+// SPELL I — MAKE TEN ADDITION
+// ============================
+let mtOrigA = 9;
+let mtOrigB = 4;
+let mtA = 9;
+let mtB = 4;
+let mtTransfer = 0;
+
+function clampDigit(n) {
+  n = parseInt(n, 10);
+  if (isNaN(n)) return null;
+  return Math.max(1, Math.min(9, n));
+}
+function randomDigit() { return Math.floor(Math.random() * 9) + 1; }
+function randomMakeTenPair() {
+  let a, b;
+  do {
+    a = randomDigit();
+    b = randomDigit();
+  } while (a + b < 10 || a + b > 18);
+  return {a, b};
+}
+function setMakeTenFact(a, b) {
+  a = clampDigit(a); b = clampDigit(b);
+  if (a === null || b === null) {
+    const pair = randomMakeTenPair();
+    a = pair.a; b = pair.b;
+  }
+  mtOrigA = a; mtOrigB = b;
+  mtTransfer = 0;
+  mtA = mtOrigA; mtB = mtOrigB;
+  const aEl = document.getElementById('mtA');
+  const bEl = document.getElementById('mtB');
+  if (aEl) aEl.value = mtOrigA;
+  if (bEl) bEl.value = mtOrigB;
+  renderMakeTenSpell();
+}
+function setMakeTenFromInputs() {
+  const aEl = document.getElementById('mtA');
+  const bEl = document.getElementById('mtB');
+  const aRaw = aEl ? aEl.value : '';
+  const bRaw = bEl ? bEl.value : '';
+  if (aRaw === '' || bRaw === '') {
+    const pair = randomMakeTenPair();
+    setMakeTenFact(pair.a, pair.b);
+    return;
+  }
+  const a = clampDigit(aRaw);
+  const b = clampDigit(bRaw);
+  if (a === null || b === null) return;
+  mtOrigA = a; mtOrigB = b; mtTransfer = 0;
+  mtA = mtOrigA; mtB = mtOrigB;
+  if (aEl && String(aEl.value) !== String(a)) aEl.value = a;
+  if (bEl && String(bEl.value) !== String(b)) bEl.value = b;
+  renderMakeTenSpell();
+}
+function randomMakeTenFact() {
+  const pair = randomMakeTenPair();
+  setMakeTenFact(pair.a, pair.b);
+}
+function resetMakeTenTransfer() {
+  mtTransfer = 0;
+  mtA = mtOrigA;
+  mtB = mtOrigB;
+  renderMakeTenSpell();
+}
+function moveMakeTen(dir) {
+  // dir = +1 moves one from B to A. dir = -1 moves one from A to B.
+  const proposed = mtTransfer + dir;
+  const newA = mtOrigA + proposed;
+  const newB = mtOrigB - proposed;
+  if (newA < 0 || newB < 0 || newA > 18 || newB > 18) return;
+  mtTransfer = proposed;
+  mtA = newA;
+  mtB = newB;
+  renderMakeTenSpell();
+}
+function autoMakeTen() {
+  const needA = 10 - mtOrigA;
+  const needB = 10 - mtOrigB;
+  if (needA > 0 && mtOrigB >= needA) mtTransfer = needA;
+  else if (needB > 0 && mtOrigA >= needB) mtTransfer = -needB;
+  else mtTransfer = 0;
+  mtA = mtOrigA + mtTransfer;
+  mtB = mtOrigB - mtTransfer;
+  renderMakeTenSpell();
+}
+function tenFrameHtml(anchor, moved) {
+  anchor = Math.max(0, Math.min(10, anchor));
+  moved = Math.max(0, Math.min(10 - anchor, moved));
+  let html = '<div class="ten-frame">';
+  for (let i = 1; i <= 10; i++) {
+    let cls = 'ten-dot';
+    if (i <= anchor) cls += ' filled-a';
+    else if (i <= anchor + moved) cls += ' filled-move';
+    html += `<div class="${cls}"></div>`;
+  }
+  html += '</div>';
+  return html;
+}
+function leftoverDotsHtml(n) {
+  if (n <= 0) return '<div class="leftover-dots"><span style="font-size:0.8rem;color:var(--muted);font-style:italic">nothing left over</span></div>';
+  return '<div class="leftover-dots">' + Array(n).fill('<div class="leftover-dot"></div>').join('') + '</div>';
+}
+function renderMakeTenBoard(a, b) {
+  const board = document.getElementById('makeTenBoard');
+  if (!board) return;
+  let html = '';
+  for (let r = 1; r <= 9; r++) {
+    for (let c = 1; c <= 9; c++) {
+      const active = r === a && c === b ? ' active-fact' : '';
+      html += `<button class="make-ten-cell${active}" onclick="setMakeTenFact(${r},${c})">${r}+${c}</button>`;
+    }
+  }
+  board.innerHTML = html;
+}
+function renderMakeTenSpell() {
+  const total = mtOrigA + mtOrigB;
+  mtA = mtOrigA + mtTransfer;
+  mtB = mtOrigB - mtTransfer;
+  const ws = document.getElementById('makeTenWorkspace');
+  if (!ws) return;
+  renderMakeTenBoard(mtOrigA, mtOrigB);
+
+  const movedFromB = Math.max(0, mtTransfer);
+  const movedFromA = Math.max(0, -mtTransfer);
+  const madeTen = mtA === 10 || mtB === 10;
+  const targetSide = mtA === 10 ? 'A' : mtB === 10 ? 'B' : (mtOrigA >= mtOrigB ? 'A' : 'B');
+  const canMoveBtoA = mtB > 0;
+  const canMoveAtoB = mtA > 0;
+  const equationChain = mtTransfer === 0
+    ? `${mtOrigA} + ${mtOrigB}`
+    : `${mtOrigA} + ${mtOrigB} = ${mtA} + ${mtB} = ${total}`;
+
+  let guidance;
+  if (madeTen) {
+    guidance = `<strong>Perfect.</strong> You changed the addends, but not the sum. Now it is a friendly ten problem: <strong>${mtA} + ${mtB} = ${total}</strong>.`;
+  } else if (total < 10) {
+    guidance = `This fact is below ten, so the make-ten spell is optional. You can still trade up and down to see that the total stays <strong>${total}</strong>.`;
+  } else {
+    const needA = 10 - mtA;
+    const needB = 10 - mtB;
+    if (needA > 0 && mtB >= needA) guidance = `Move <strong>${needA}</strong> from B to A to make <strong>10</strong>.`;
+    else if (needB > 0 && mtA >= needB) guidance = `Move <strong>${needB}</strong> from A to B to make <strong>10</strong>.`;
+    else guidance = `Keep trading one at a time. The two numbers change together, but the total stays <strong>${total}</strong>.`;
+  }
+
+  const aTenClass = mtA === 10 ? ' ten' : '';
+  const bTenClass = mtB === 10 ? ' ten' : '';
+  ws.innerHTML = `<div class="objects-label">Make-Ten Workspace</div>
+    <div class="make-ten-transfer">
+      <div class="transfer-number">
+        <div class="transfer-label">Number A</div>
+        <button class="transfer-btn" onclick="moveMakeTen(1)" ${!canMoveBtoA ? 'disabled' : ''}>▲</button>
+        <div class="transfer-value${aTenClass}">${mtA}</div>
+        <button class="transfer-btn" onclick="moveMakeTen(-1)" ${!canMoveAtoB ? 'disabled' : ''}>▼</button>
+        <div class="transfer-change">${mtTransfer > 0 ? '+' + mtTransfer : mtTransfer < 0 ? mtTransfer : 'start'}</div>
+      </div>
+      <div class="transfer-plus">+</div>
+      <div class="transfer-number">
+        <div class="transfer-label">Number B</div>
+        <button class="transfer-btn" onclick="moveMakeTen(-1)" ${!canMoveAtoB ? 'disabled' : ''}>▲</button>
+        <div class="transfer-value${bTenClass}">${mtB}</div>
+        <button class="transfer-btn" onclick="moveMakeTen(1)" ${!canMoveBtoA ? 'disabled' : ''}>▼</button>
+        <div class="transfer-change">${mtTransfer > 0 ? '-' + mtTransfer : mtTransfer < 0 ? '+' + Math.abs(mtTransfer) : 'start'}</div>
+      </div>
+    </div>
+    <div class="transfer-note">Tap A ▲ to take 1 from B and give it to A. Tap B ▲ to take 1 from A and give it to B. The sum stays the same.</div>
+    <div class="transfer-eq">
+      <div class="make-ten-token glow">${mtOrigA} + ${mtOrigB}</div>
+      <div class="make-ten-arrow">=</div>
+      <div class="make-ten-token${madeTen ? ' ten' : ''}">${mtA} + ${mtB}</div>
+      <div class="make-ten-arrow">=</div>
+      <div class="make-ten-token glow">${total}</div>
+    </div>
+    <div class="explanation" style="margin-bottom:12px;text-align:center">${guidance}</div>
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button class="step-btn" onclick="autoMakeTen()" style="margin-top:0">✨ Auto Make Ten</button>
+      <button class="reset-btn" onclick="resetMakeTenTransfer()" style="margin-top:0">↺ Back to ${mtOrigA} + ${mtOrigB}</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start">
+      <div class="val-chip" style="padding:12px">
+        <div class="label">A ten-frame</div>
+        ${tenFrameHtml(Math.min(mtOrigA, mtA), movedFromB)}
+        <div style="font-size:0.8rem;color:var(--muted);font-style:italic;margin-top:6px">Gold = original A; teal = moved from B</div>
+      </div>
+      <div class="val-chip" style="padding:12px">
+        <div class="label">B leftovers</div>
+        ${leftoverDotsHtml(mtB)}
+        <div style="font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent3);margin-top:8px">${mtB}</div>
+      </div>
+    </div>`;
+}
+
 // ============================
 // TASK 1
 // ============================
@@ -1482,12 +1904,13 @@ function renderChallenge() {
 function switchTab(idx) {
   document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
-  if (idx === 2) renderHistoryPanel();
+  if (idx === 3) renderHistoryPanel();
 }
 
 // ============================
 // INIT
 // ============================
+renderMakeTenSpell();
 initTask1();
 initStrategy();
 renderHistoryPanel();
