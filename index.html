@@ -807,6 +807,20 @@
   .near-dot.extra { background:var(--teal); box-shadow:0 0 7px rgba(78,201,176,0.28); }
   .near-dot.extra.negative { background:var(--accent3); box-shadow:0 0 7px rgba(224,92,42,0.28); }
 
+
+
+  /* Practice tracking */
+  .score-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 0 0 20px; z-index: 1; position: relative; }
+  .score-chip { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 128px; }
+  .score-chip .sc-label { font-family: 'Cinzel', serif; font-size: 0.65rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+  .score-chip .sc-val { font-family: 'Space Mono', monospace; font-size: 1.2rem; font-weight: 700; color: var(--accent); }
+  .practice-history-line { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+  .practice-history-badge { flex-shrink:0; width:34px; height:34px; border-radius:50%; background:var(--teal); color:var(--bg); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:900; font-size:0.82rem; }
+  .practice-history-main { flex:1; min-width:0; }
+  .practice-history-eq { font-family:'Space Mono',monospace; color:var(--green); font-weight:700; font-size:0.9rem; }
+  .practice-history-detail { color:var(--muted); font-size:0.78rem; margin-top:2px; }
+  .practice-history-time { flex-shrink:0; font-family:'Space Mono',monospace; color:var(--muted); font-size:0.72rem; padding-top:2px; }
+
   @media (max-width: 500px) {
     .make-ten-board { grid-template-columns: repeat(3, 1fr); }
     .make-ten-token { min-width: 58px; font-size: 1.18rem; padding: 10px 10px; }
@@ -866,6 +880,13 @@
   <button class="tab-btn" onclick="switchTab(2)">✦ Spell III: Strategy</button>
   <button class="tab-btn" onclick="switchTab(3)">✦ Spell IV: Slide</button>
   <button class="tab-btn" onclick="switchTab(4)">🏆 Spell V: O.W.L. Exam</button>
+</div>
+
+<!-- Practice Tracking -->
+<div class="score-row" id="practiceScoreRow">
+  <div class="score-chip"><div class="sc-label">Spells Practiced</div><div class="sc-val" id="practiceSolvedCount">0</div></div>
+  <div class="score-chip"><div class="sc-label">House Points</div><div class="sc-val" id="practicePointsCount">0</div></div>
+  <div class="score-chip"><div class="sc-label">Streak 🔥</div><div class="sc-val" id="practiceStreakCount">0</div></div>
 </div>
 
 <!-- ===== TAB 1: MAKE TEN ===== -->
@@ -1045,6 +1066,22 @@
   </div>
 </div>
 
+<!-- Practice History Log -->
+<div class="card" id="practiceHistoryCard" style="margin-top:18px; width: 100%; max-width: 720px; margin-left: auto; margin-right: auto; z-index:1; position:relative;">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;cursor:pointer;user-select:none" onclick="togglePracticeHistory()">
+    <div class="objects-label" style="margin-bottom:0;display:flex;align-items:center;gap:8px">
+      <span>📜 Spell Book — Strategy Practice</span>
+      <span id="practiceHistoryChevron" style="font-size:0.8rem;color:var(--muted);transition:transform 0.3s;">▼</span>
+    </div>
+    <button class="reset-btn" style="margin-top:0" onclick="event.stopPropagation(); clearPracticeHistory()">✕ Clear Practice</button>
+  </div>
+  <div id="practiceHistoryCollapseContainer" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+    <div id="practiceHistoryLines">
+      <div style="color:var(--muted);font-style:italic;font-size:0.9rem">No strategy spells completed yet — finish a Make Ten or Near Doubles spell to record your first entry!</div>
+    </div>
+  </div>
+</div>
+
 <script>
 
 // ============================
@@ -1055,6 +1092,15 @@ let mtOrigB = 4;
 let mtA = 9;
 let mtB = 4;
 let mtTransfer = 0;
+let mtLoggedKey = null;
+let mtAnswerWrong = false;
+let mtAnsweredCorrect = false;
+const STRATEGY_CHALLENGE_TOTAL = 10;
+let mtChallengeActive = true;
+let mtChallengeIndex = 1;
+let mtChallengeCorrect = 0;
+let mtChallengeComplete = false;
+let mtLastAnswer = '';
 
 function clampDigit(n) {
   n = parseInt(n, 10);
@@ -1078,6 +1124,8 @@ function setMakeTenFact(a, b) {
   }
   mtOrigA = a; mtOrigB = b;
   mtTransfer = 0;
+  mtLoggedKey = null;
+  mtAnswerWrong = false; mtAnsweredCorrect = false; mtLastAnswer = '';
   mtA = mtOrigA; mtB = mtOrigB;
   const aEl = document.getElementById('mtA');
   const bEl = document.getElementById('mtB');
@@ -1099,6 +1147,8 @@ function setMakeTenFromInputs() {
   const b = clampDigit(bRaw);
   if (a === null || b === null) return;
   mtOrigA = a; mtOrigB = b; mtTransfer = 0;
+  mtLoggedKey = null;
+  mtAnswerWrong = false; mtAnsweredCorrect = false; mtLastAnswer = '';
   mtA = mtOrigA; mtB = mtOrigB;
   if (aEl && String(aEl.value) !== String(a)) aEl.value = a;
   if (bEl && String(bEl.value) !== String(b)) bEl.value = b;
@@ -1109,6 +1159,7 @@ function randomMakeTenFact() {
   setMakeTenFact(pair.a, pair.b);
 }
 function resetMakeTenTransfer() {
+  mtLoggedKey = null;
   mtTransfer = 0;
   mtA = mtOrigA;
   mtB = mtOrigB;
@@ -1123,6 +1174,7 @@ function moveMakeTen(dir) {
   mtTransfer = proposed;
   mtA = newA;
   mtB = newB;
+  mtAnswerWrong = false; mtAnsweredCorrect = false; mtLastAnswer = '';
   renderMakeTenSpell();
 }
 function autoMakeTen() {
@@ -1133,7 +1185,69 @@ function autoMakeTen() {
   else mtTransfer = 0;
   mtA = mtOrigA + mtTransfer;
   mtB = mtOrigB - mtTransfer;
+  mtAnswerWrong = false; mtAnsweredCorrect = false; mtLastAnswer = '';
   renderMakeTenSpell();
+}
+
+function submitMakeTenAnswer() {
+  const input = document.getElementById('mtAnswerInput');
+  if (!input) return;
+  const raw = input.value.trim();
+  mtLastAnswer = raw;
+  const userVal = parseInt(raw, 10);
+  const total = mtOrigA + mtOrigB;
+  const correct = raw !== '' && userVal === total;
+  mtAnswerWrong = !correct;
+  mtAnsweredCorrect = correct;
+  trackPracticeAttempt(
+    'Spell I: Make Ten',
+    `${mtOrigA} + ${mtOrigB}`,
+    raw,
+    total,
+    'Make Ten',
+    correct
+      ? `${mtOrigA} + ${mtOrigB} was changed to ${mtA} + ${mtB}; entered ${raw}.`
+      : `${mtOrigA} + ${mtOrigB}; entered ${raw || 'blank'}; correct answer ${total}.`,
+    correct,
+    correct ? 10 : 0
+  );
+  renderMakeTenSpell();
+  if (correct) advanceMakeTenChallengeAfterCorrect();
+}
+
+
+function resetMakeTenChallenge() {
+  mtChallengeActive = true;
+  mtChallengeIndex = 1;
+  mtChallengeCorrect = 0;
+  mtChallengeComplete = false;
+  mtLastAnswer = '';
+  randomMakeTenFact();
+}
+function advanceMakeTenChallengeAfterCorrect() {
+  if (!mtChallengeActive || mtChallengeComplete) return;
+  mtChallengeCorrect += 1;
+  if (mtChallengeIndex >= STRATEGY_CHALLENGE_TOTAL) {
+    mtChallengeComplete = true;
+    mtChallengeActive = false;
+    renderMakeTenSpell();
+    return;
+  }
+  mtChallengeIndex += 1;
+  setTimeout(() => {
+    const pair = randomMakeTenPair();
+    setMakeTenFact(pair.a, pair.b);
+  }, 650);
+}
+function makeTenChallengeBanner() {
+  const label = mtChallengeComplete
+    ? `Challenge complete: ${mtChallengeCorrect}/${STRATEGY_CHALLENGE_TOTAL} correct`
+    : `Question ${mtChallengeIndex} of ${STRATEGY_CHALLENGE_TOTAL} · Correct ${mtChallengeCorrect}`;
+  const color = mtChallengeComplete ? '#50e090' : 'var(--accent)';
+  return `<div class="val-chip" style="margin:0 auto 14px;max-width:360px;padding:10px 14px;border-color:${mtChallengeComplete ? 'rgba(80,224,144,0.35)' : 'var(--border)'}">
+    <div class="label">Spell I Challenge</div>
+    <div class="value" style="color:${color}">${label}</div>
+  </div>`;
 }
 function tenFrameHtml(anchor, moved) {
   anchor = Math.max(0, Math.min(10, anchor));
@@ -1173,31 +1287,30 @@ function renderMakeTenSpell() {
   renderMakeTenBoard(mtOrigA, mtOrigB);
 
   const movedFromB = Math.max(0, mtTransfer);
-  const movedFromA = Math.max(0, -mtTransfer);
   const madeTen = mtA === 10 || mtB === 10;
-  const targetSide = mtA === 10 ? 'A' : mtB === 10 ? 'B' : (mtOrigA >= mtOrigB ? 'A' : 'B');
   const canMoveBtoA = mtB > 0;
   const canMoveAtoB = mtA > 0;
-  const equationChain = mtTransfer === 0
-    ? `${mtOrigA} + ${mtOrigB}`
-    : `${mtOrigA} + ${mtOrigB} = ${mtA} + ${mtB} = ${total}`;
 
   let guidance;
-  if (madeTen) {
-    guidance = `<strong>Perfect.</strong> You changed the addends, but not the sum. Now it is a friendly ten problem: <strong>${mtA} + ${mtB} = ${total}</strong>.`;
+  if (mtChallengeComplete) {
+    guidance = `<strong>Challenge complete!</strong> You finished all ${STRATEGY_CHALLENGE_TOTAL} Make-Ten questions. Start a new challenge when ready.`;
+  } else if (madeTen) {
+    guidance = `<strong>Perfect.</strong> You changed the addends, but not the sum. Now it is a friendly ten problem: <strong>${mtA} + ${mtB}</strong>. Type the answer in the equation box.`;
   } else if (total < 10) {
-    guidance = `This fact is below ten, so the make-ten spell is optional. You can still trade up and down to see that the total stays <strong>${total}</strong>.`;
+    guidance = `This fact is below ten, so the make-ten spell is optional. You can still trade up and down, then type the answer when ready.`;
   } else {
     const needA = 10 - mtA;
     const needB = 10 - mtB;
-    if (needA > 0 && mtB >= needA) guidance = `Move <strong>${needA}</strong> from B to A to make <strong>10</strong>.`;
-    else if (needB > 0 && mtA >= needB) guidance = `Move <strong>${needB}</strong> from A to B to make <strong>10</strong>.`;
-    else guidance = `Keep trading one at a time. The two numbers change together, but the total stays <strong>${total}</strong>.`;
+    if (needA > 0 && mtB >= needA) guidance = `Move <strong>${needA}</strong> from B to A to make <strong>10</strong>, or press <strong>Show me</strong>.`;
+    else if (needB > 0 && mtA >= needB) guidance = `Move <strong>${needB}</strong> from A to B to make <strong>10</strong>, or press <strong>Show me</strong>.`;
+    else guidance = `Keep trading one at a time. The two numbers change together, but the answer stays the same.`;
   }
 
   const aTenClass = mtA === 10 ? ' ten' : '';
   const bTenClass = mtB === 10 ? ' ten' : '';
+  const answerBorder = mtAnswerWrong ? 'var(--accent3)' : mtAnsweredCorrect ? '#50e090' : 'var(--accent)';
   ws.innerHTML = `<div class="objects-label">Make-Ten Workspace</div>
+    ${makeTenChallengeBanner()}
     <div class="number-picker" style="margin-bottom:12px">
       <div class="picker-group">
         <div class="picker-label">Number A</div>
@@ -1212,8 +1325,8 @@ function renderMakeTenSpell() {
       </div>
     </div>
     <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-      <button class="step-btn" onclick="randomMakeTenFact()" style="margin-top:0">✨ Random Fact</button>
-      <button class="reset-btn" onclick="setMakeTenFact(9,4)" style="margin-top:0">Show 9 + 4</button>
+      <button class="step-btn" onclick="resetMakeTenChallenge()" style="margin-top:0">✨ Start New 10-Question Challenge</button>
+      <button class="reset-btn" onclick="setMakeTenFact(9,4)" style="margin-top:0">Load 9 + 4</button>
       <button class="reset-btn" onclick="resetMakeTenTransfer()" style="margin-top:0">↺ Reset this fact</button>
     </div>
     <div class="make-ten-transfer">
@@ -1239,11 +1352,16 @@ function renderMakeTenSpell() {
       <div class="make-ten-arrow">=</div>
       <div class="make-ten-token${madeTen ? ' ten' : ''}">${mtA} + ${mtB}</div>
       <div class="make-ten-arrow">=</div>
-      <div class="make-ten-token glow">${total}</div>
+      <div class="make-ten-token" style="padding:8px 10px;border-color:${answerBorder}">
+        <input id="mtAnswerInput" class="picker-input" type="number" inputmode="numeric" placeholder="?" value="${mtLastAnswer}" onkeydown="if(event.key==='Enter')submitMakeTenAnswer()" style="width:82px;border-color:${answerBorder};font-size:1.35rem">
+      </div>
+      <button class="step-btn" onclick="submitMakeTenAnswer()" style="margin-top:0">✓ Check</button>
     </div>
     <div class="explanation" style="margin-bottom:12px;text-align:center">${guidance}</div>
+    ${mtAnswerWrong ? `<div style="text-align:center;font-size:0.86rem;color:var(--accent3);margin-bottom:10px">Not quite — try the friendly problem ${mtA} + ${mtB}.</div>` : ''}
+    ${mtAnsweredCorrect && !mtChallengeComplete ? `<div style="text-align:center;font-size:0.9rem;color:#50e090;margin-bottom:10px">Correct — ${mtOrigA} + ${mtOrigB} = ${total}! Loading the next question…</div>` : ''}
     <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-      <button class="step-btn" onclick="autoMakeTen()" style="margin-top:0">✨ Auto Make Ten</button>
+      <button class="step-btn" onclick="autoMakeTen()" style="margin-top:0">🔮 Show me</button>
       <button class="reset-btn" onclick="resetMakeTenTransfer()" style="margin-top:0">↺ Back to ${mtOrigA} + ${mtOrigB}</button>
     </div>`;
 
@@ -1277,12 +1395,22 @@ let ndOrigB = 6;
 let ndCurA = 5;
 let ndCurB = 6;
 let ndShowBreakdown = false;
+let ndLoggedKey = null;
+let ndAnswerWrong = false;
+let ndAnsweredCorrect = false;
+let ndChallengeActive = true;
+let ndChallengeIndex = 1;
+let ndChallengeCorrect = 0;
+let ndChallengeComplete = false;
+let ndLastAnswer = '';
 
 function randomNearDoublesPair() {
-  const base = Math.floor(Math.random() * 8) + 1;
-  const diff = Math.random() < 0.75 ? 1 : 2;
-  const larger = Math.min(9, base + diff);
-  const smaller = larger - diff;
+  // Near doubles should stay close: the difference is capped at 2.
+  // Examples include 3+1, 5+3, 5+6, 7+5, and 8+6.
+  const diffOptions = [1, 1, 1, 2, 2];
+  const diff = diffOptions[Math.floor(Math.random() * diffOptions.length)];
+  const smaller = Math.floor(Math.random() * (9 - diff)) + 1;
+  const larger = smaller + diff;
   if (Math.random() < 0.5) return {a: smaller, b: larger};
   return {a: larger, b: smaller};
 }
@@ -1295,6 +1423,8 @@ function setNearDoublesFact(a, b) {
   ndOrigA = a; ndOrigB = b;
   ndCurA = a; ndCurB = b;
   ndShowBreakdown = false;
+  ndLoggedKey = null;
+  ndAnswerWrong = false; ndAnsweredCorrect = false; ndLastAnswer = '';
   const aEl = document.getElementById('ndA');
   const bEl = document.getElementById('ndB');
   if (aEl) aEl.value = ndOrigA;
@@ -1317,6 +1447,8 @@ function setNearDoublesFromInputs() {
   ndOrigA = a; ndOrigB = b;
   ndCurA = a; ndCurB = b;
   ndShowBreakdown = false;
+  ndLoggedKey = null;
+  ndAnswerWrong = false; ndAnsweredCorrect = false; ndLastAnswer = '';
   if (aEl && String(aEl.value) !== String(a)) aEl.value = a;
   if (bEl && String(bEl.value) !== String(b)) bEl.value = b;
   renderNearDoublesSpell();
@@ -1326,9 +1458,11 @@ function randomNearDoublesFact() {
   setNearDoublesFact(pair.a, pair.b);
 }
 function resetNearDoublesManipulation() {
+  ndLoggedKey = null;
   ndCurA = ndOrigA;
   ndCurB = ndOrigB;
   ndShowBreakdown = false;
+  ndAnswerWrong = false; ndAnsweredCorrect = false; ndLastAnswer = '';
   renderNearDoublesSpell();
 }
 function moveNearDouble(which, dir) {
@@ -1366,7 +1500,72 @@ function showNearDoublesBreakdown() {
     }
   }
   ndShowBreakdown = true;
+  ndAnswerWrong = false; ndAnsweredCorrect = false; ndLastAnswer = '';
   renderNearDoublesSpell();
+}
+
+function submitNearDoublesAnswer() {
+  const input = document.getElementById('ndAnswerInput');
+  if (!input) return;
+  const raw = input.value.trim();
+  ndLastAnswer = raw;
+  const userVal = parseInt(raw, 10);
+  const total = ndOrigA + ndOrigB;
+  const correct = raw !== '' && userVal === total;
+  ndAnswerWrong = !correct;
+  ndAnsweredCorrect = correct;
+  const resA = ndOrigA - ndCurA;
+  const resB = ndOrigB - ndCurB;
+  const residualTotal = resA + resB;
+  trackPracticeAttempt(
+    'Spell II: Near Doubles',
+    `${ndOrigA} + ${ndOrigB}`,
+    raw,
+    total,
+    'Near Doubles',
+    correct
+      ? `${ndOrigA} + ${ndOrigB} was matched as ${ndCurA} + ${ndCurB}${formatResidualTerm(residualTotal)}; entered ${raw}.`
+      : `${ndOrigA} + ${ndOrigB}; entered ${raw || 'blank'}; correct answer ${total}.`,
+    correct,
+    correct ? 10 : 0
+  );
+  renderNearDoublesSpell();
+  if (correct) advanceNearDoublesChallengeAfterCorrect();
+}
+
+
+function resetNearDoublesChallenge() {
+  ndChallengeActive = true;
+  ndChallengeIndex = 1;
+  ndChallengeCorrect = 0;
+  ndChallengeComplete = false;
+  ndLastAnswer = '';
+  randomNearDoublesFact();
+}
+function advanceNearDoublesChallengeAfterCorrect() {
+  if (!ndChallengeActive || ndChallengeComplete) return;
+  ndChallengeCorrect += 1;
+  if (ndChallengeIndex >= STRATEGY_CHALLENGE_TOTAL) {
+    ndChallengeComplete = true;
+    ndChallengeActive = false;
+    renderNearDoublesSpell();
+    return;
+  }
+  ndChallengeIndex += 1;
+  setTimeout(() => {
+    const pair = randomNearDoublesPair();
+    setNearDoublesFact(pair.a, pair.b);
+  }, 650);
+}
+function nearDoublesChallengeBanner() {
+  const label = ndChallengeComplete
+    ? `Challenge complete: ${ndChallengeCorrect}/${STRATEGY_CHALLENGE_TOTAL} correct`
+    : `Question ${ndChallengeIndex} of ${STRATEGY_CHALLENGE_TOTAL} · Correct ${ndChallengeCorrect}`;
+  const color = ndChallengeComplete ? '#50e090' : 'var(--accent)';
+  return `<div class="val-chip" style="margin:0 auto 14px;max-width:360px;padding:10px 14px;border-color:${ndChallengeComplete ? 'rgba(80,224,144,0.35)' : 'var(--border)'}">
+    <div class="label">Spell II Challenge</div>
+    <div class="value" style="color:${color}">${label}</div>
+  </div>`;
 }
 function nearDotsHtml(n, cls) {
   if (n <= 0) return '<div class="near-dot-row"><span style="font-size:0.8rem;color:var(--muted);font-style:italic">none</span></div>';
@@ -1404,16 +1603,18 @@ function renderNearDoublesSpell() {
   const residualTotal = resA + resB;
 
   let guidance;
-  if (!ndShowBreakdown) {
+  if (ndChallengeComplete) {
+    guidance = `<strong>Challenge complete!</strong> You finished all ${STRATEGY_CHALLENGE_TOTAL} Near-Doubles questions. Start a new challenge when ready.`;
+  } else if (!ndShowBreakdown) {
     if (a === b) {
       guidance = `This one is already a double. Think: <strong>${a} + ${b}</strong>. Press <strong>Show me</strong> when you want the spell to reveal it.`;
     } else if (matched) {
-      guidance = `Nice — you made a matching pair: <strong>${curA} + ${curB}</strong>. The remainder box shows what was left over from the number you changed.`;
+      guidance = `Nice — you made a matching pair: <strong>${curA} + ${curB}</strong>. The remainder box shows what was left over from the number you changed. Type the answer in the equation box.`;
     } else {
       guidance = `Use the arrows to make the two center numbers match. Usually, move the larger number down until it matches the smaller number. The leftover appears in the remainder box.`;
     }
   } else if (a === b) {
-    guidance = `This is already a double: <strong>${a} + ${b} = ${total}</strong>.`;
+    guidance = `This is already a double: <strong>${a} + ${b}</strong>. Type the answer in the equation box.`;
   } else {
     guidance = `The matched pair makes the double: <strong>${curA} + ${curB} = ${doubleValue}</strong>. Then add the remainder <strong>${residualTotal}</strong> to finish.`;
   }
@@ -1424,6 +1625,7 @@ function renderNearDoublesSpell() {
   const leftOriginalExpanded = resA === 0 ? `${curA}` : `(${curA}${formatResidualTerm(resA)})`;
   const rightOriginalExpanded = resB === 0 ? `${curB}` : `(${curB}${formatResidualTerm(resB)})`;
   const residualPhrase = residualTotal === 0 ? '' : (residualTotal > 0 ? ` + ${residualTotal}` : ` − ${Math.abs(residualTotal)}`);
+  const answerBorder = ndAnswerWrong ? 'var(--accent3)' : ndAnsweredCorrect ? '#50e090' : 'var(--accent)';
   const revealHtml = showEq
     ? `<div class="near-double-eq">
         <div class="near-double-token">${a} + ${b}</div>
@@ -1432,15 +1634,24 @@ function renderNearDoublesSpell() {
         <div class="make-ten-arrow">=</div>
         <div class="near-double-token double">${curA} + ${curB}${residualPhrase}</div>
         <div class="make-ten-arrow">=</div>
-        <div class="near-double-token">${total}</div>
+        <div class="near-double-token" style="padding:8px 10px;border-color:${answerBorder}">
+          <input id="ndAnswerInput" class="picker-input" type="number" inputmode="numeric" placeholder="?" value="${ndLastAnswer}" onkeydown="if(event.key==='Enter')submitNearDoublesAnswer()" style="width:82px;border-color:${answerBorder};font-size:1.35rem">
+        </div>
+        <button class="step-btn" onclick="submitNearDoublesAnswer()" style="margin-top:0">✓ Check</button>
       </div>`
     : `<div class="near-double-eq">
         <div class="near-double-token glow">${a} + ${b}</div>
         <div class="make-ten-arrow">=</div>
-        <div class="near-double-token" style="color:var(--muted)">${matched ? `${curA} + ${curB} ${residualPhrase}` : '?'}</div>
+        <div class="near-double-token" style="color:var(--muted)">${matched ? `${curA} + ${curB}${residualPhrase}` : '?'}</div>
+        <div class="make-ten-arrow">=</div>
+        <div class="near-double-token" style="padding:8px 10px;border-color:${answerBorder}">
+          <input id="ndAnswerInput" class="picker-input" type="number" inputmode="numeric" placeholder="?" value="${ndLastAnswer}" onkeydown="if(event.key==='Enter')submitNearDoublesAnswer()" style="width:82px;border-color:${answerBorder};font-size:1.35rem">
+        </div>
+        <button class="step-btn" onclick="submitNearDoublesAnswer()" style="margin-top:0">✓ Check</button>
       </div>`;
 
   ws.innerHTML = `<div class="objects-label">Near-Doubles Workspace</div>
+    ${nearDoublesChallengeBanner()}
     <div class="number-picker" style="margin-bottom:12px">
       <div class="picker-group">
         <div class="picker-label">Number A</div>
@@ -1455,7 +1666,7 @@ function renderNearDoublesSpell() {
       </div>
     </div>
     <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px">
-      <button class="step-btn" onclick="randomNearDoublesFact()" style="margin-top:0">✨ Random Near Double</button>
+      <button class="step-btn" onclick="resetNearDoublesChallenge()" style="margin-top:0">✨ Start New 10-Question Challenge</button>
       <button class="step-btn" onclick="showNearDoublesBreakdown()" style="margin-top:0" ${ndShowBreakdown ? 'disabled' : ''}>🔮 Show me</button>
       <button class="reset-btn" onclick="resetNearDoublesManipulation()" style="margin-top:0">↺ Reset</button>
     </div>
@@ -1482,6 +1693,8 @@ function renderNearDoublesSpell() {
     </div>
     ${revealHtml}
     <div class="explanation" style="margin-bottom:12px;text-align:center">${guidance}</div>
+    ${ndAnswerWrong ? `<div style="text-align:center;font-size:0.86rem;color:var(--accent3);margin-bottom:10px">Not quite — try the matched pair and remainder.</div>` : ''}
+    ${ndAnsweredCorrect && !ndChallengeComplete ? `<div style="text-align:center;font-size:0.9rem;color:#50e090;margin-bottom:10px">Correct — ${a} + ${b} = ${total}! Loading the next question…</div>` : ''}
     <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
       <button class="step-btn" onclick="autoNearDoubleMatch()" style="margin-top:0">✨ Match the Pair</button>
       <button class="reset-btn" onclick="resetNearDoublesManipulation()" style="margin-top:0">↺ Back to ${a} + ${b}</button>
@@ -1528,7 +1741,7 @@ function renderNearDoublesSpell() {
             ${nearDotsHtml(Math.abs(residualTotal), residualDotClass(residualTotal))}
           </div>
         </div>
-        <div class="result-line" style="margin-top:14px">${leftOriginalExpanded} + ${rightOriginalExpanded} → ${curA} + ${curB}${residualPhrase} = ${total}</div>`;
+        <div class="result-line" style="margin-top:14px">${leftOriginalExpanded} + ${rightOriginalExpanded} → ${curA} + ${curB}${residualPhrase}</div>`;
     }
   }
 }
@@ -1979,6 +2192,131 @@ function renderStrategy() {
   ws.innerHTML = html;
 }
 
+
+// ============================
+// PRACTICE TRACKING
+// ============================
+const PRACTICE_TRACK_KEY = 'dt-practice-tracking-v1';
+let practiceHistoryExpanded = false;
+let practiceStats = { solved: 0, points: 0, streak: 0, history: [] };
+
+function loadPracticeTracking() {
+  try {
+    const raw = localStorage.getItem(PRACTICE_TRACK_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      practiceStats = {
+        solved: parsed.solved || 0,
+        points: parsed.points || 0,
+        streak: parsed.streak || 0,
+        history: Array.isArray(parsed.history) ? parsed.history : []
+      };
+    }
+  } catch(e) {}
+  renderPracticeTracking();
+}
+function savePracticeTracking() {
+  try { localStorage.setItem(PRACTICE_TRACK_KEY, JSON.stringify(practiceStats)); } catch(e) {}
+}
+function renderPracticeTracking() {
+  const solvedEl = document.getElementById('practiceSolvedCount');
+  const pointsEl = document.getElementById('practicePointsCount');
+  const streakEl = document.getElementById('practiceStreakCount');
+  if (solvedEl) solvedEl.textContent = practiceStats.solved;
+  if (pointsEl) pointsEl.textContent = practiceStats.points;
+  if (streakEl) streakEl.textContent = practiceStats.streak;
+  renderPracticeHistory();
+}
+function togglePracticeHistory() {
+  practiceHistoryExpanded = !practiceHistoryExpanded;
+  const c = document.getElementById('practiceHistoryCollapseContainer');
+  const chev = document.getElementById('practiceHistoryChevron');
+  if (c) c.style.display = practiceHistoryExpanded ? 'block' : 'none';
+  if (chev) chev.style.transform = practiceHistoryExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+function trackPracticeAttempt(spell, question, userAnswer, correctAnswer, strategy, detail, correct, pointsAward) {
+  const pts = correct ? (pointsAward || 10) : 0;
+  practiceStats.solved += 1;
+  if (correct) {
+    practiceStats.streak += 1;
+    practiceStats.points += pts + (practiceStats.streak >= 3 ? 5 : 0);
+  } else {
+    practiceStats.streak = 0;
+  }
+  practiceStats.history.unshift({
+    spell,
+    equation: `${question} → you: ${userAnswer || 'blank'}${correct ? ' ✓' : ` ✗ (answer ${correctAnswer})`}`,
+    question,
+    userAnswer: userAnswer || 'blank',
+    correctAnswer,
+    correct: !!correct,
+    strategy,
+    detail,
+    points: pts,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  });
+  if (practiceStats.history.length > 40) practiceStats.history.length = 40;
+  savePracticeTracking();
+  renderPracticeTracking();
+}
+function trackPracticeSpell(spell, equation, strategy, detail, pointsAward) {
+  trackPracticeAttempt(spell, equation, 'completed', '', strategy, detail, true, pointsAward || 10);
+}
+function renderPracticeHistory() {
+  const container = document.getElementById('practiceHistoryLines');
+  if (!container) return;
+  if (!practiceStats.history.length) {
+    container.innerHTML = '<div style="color:var(--muted);font-style:italic;font-size:0.9rem">No strategy spells completed yet.</div>';
+    return;
+  }
+  container.innerHTML = practiceStats.history.map((e, i) => {
+    const badge = e.spell.includes('Near') ? 'II' : 'I';
+    const badgeColor = e.correct === false ? 'var(--accent3)' : (e.spell.includes('Near') ? 'var(--accent)' : 'var(--teal)');
+    return `<div class="practice-history-line" style="${i === 0 ? 'border-top:1px solid rgba(255,255,255,0.05)' : ''}">
+      <div class="practice-history-badge" style="background:${badgeColor}">${badge}</div>
+      <div class="practice-history-main">
+        <div class="practice-history-eq">${e.equation}</div>
+        <div class="practice-history-detail"><strong style="color:var(--accent2)">${e.spell}</strong> · ${e.strategy}${e.correct === false ? ' · try again' : ' · correct'}</div>
+        <div class="practice-history-detail">${e.detail || ''}</div>
+      </div>
+      <div class="practice-history-time">${e.time}</div>
+    </div>`;
+  }).join('');
+}
+function clearPracticeHistory() {
+  practiceStats = { solved: 0, points: 0, streak: 0, history: [] };
+  savePracticeTracking();
+  renderPracticeTracking();
+}
+function maybeTrackMakeTenCompletion(total, madeTen) {
+  if (!madeTen) return;
+  const key = `${mtOrigA}+${mtOrigB}|${mtA}+${mtB}|${mtTransfer}`;
+  if (mtLoggedKey === key) return;
+  mtLoggedKey = key;
+  const moved = Math.abs(mtTransfer);
+  const direction = mtTransfer > 0 ? `moved ${moved} from B to A` : mtTransfer < 0 ? `moved ${moved} from A to B` : 'already made ten';
+  trackPracticeSpell(
+    'Spell I: Make Ten',
+    `${mtOrigA} + ${mtOrigB} = ${mtA} + ${mtB} = ${total}`,
+    'Made a friendly ten while keeping the total unchanged.',
+    direction,
+    10
+  );
+}
+function trackNearDoublesCompletion(total, doubleValue, residualTotal) {
+  const key = `${ndOrigA}+${ndOrigB}|${ndCurA}+${ndCurB}|${residualTotal}`;
+  if (ndLoggedKey === key) return;
+  ndLoggedKey = key;
+  const residualText = residualTotal === 0 ? 'no remainder' : `remainder ${residualTotal > 0 ? '+' : '−'}${Math.abs(residualTotal)}`;
+  trackPracticeSpell(
+    'Spell II: Near Doubles',
+    `${ndOrigA} + ${ndOrigB} = ${ndCurA} + ${ndCurB}${formatResidualTerm(residualTotal)} = ${total}`,
+    `Matched a double (${ndCurA} + ${ndCurB} = ${doubleValue}), then used the remainder.`,
+    residualText,
+    10
+  );
+}
+
 // ============================
 // PERSISTENT HISTORY (localStorage)
 // ============================
@@ -2338,6 +2676,7 @@ function switchTab(idx) {
 // ============================
 // INIT
 // ============================
+loadPracticeTracking();
 renderMakeTenSpell();
 renderNearDoublesSpell();
 initTask1();
