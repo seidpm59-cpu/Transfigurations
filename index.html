@@ -677,6 +677,85 @@
     font-size:0.86rem; color:var(--muted); font-style:italic; text-align:center; line-height:1.45;
   }
 
+
+
+  /* Near-doubles addition spell */
+  .near-double-work {
+    display:flex;
+    justify-content:center;
+    align-items:stretch;
+    gap:12px;
+    flex-wrap:wrap;
+    margin:16px 0;
+  }
+  .near-double-number {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    min-width:150px;
+  }
+  .near-double-value {
+    background: var(--digit-bg);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    width: 100px;
+    min-height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3);
+    text-align:center;
+    padding:8px;
+  }
+  .near-double-value.split {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(78,201,176,0.09);
+    box-shadow: 0 0 14px rgba(78,201,176,0.22), inset 0 -2px 0 rgba(0,0,0,0.3);
+  }
+  .near-double-label {
+    font-family: 'Cinzel', serif;
+    color: var(--muted);
+    font-size: 0.76rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .near-double-eq {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:16px 0 10px;
+  }
+  .near-double-token {
+    background: var(--digit-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-width: 72px;
+    padding: 12px 14px;
+    text-align: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .near-double-token.double {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: rgba(78,201,176,0.09);
+    box-shadow: 0 0 12px rgba(78,201,176,0.18);
+  }
+  .near-dot-row { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; min-height:24px; margin-top:8px; }
+  .near-dot { width:18px; height:18px; border-radius:50%; background:var(--accent); box-shadow:0 0 7px rgba(245,200,66,0.30); }
+  .near-dot.match { background:var(--teal); box-shadow:0 0 7px rgba(78,201,176,0.35); }
+  .near-dot.extra { background:var(--accent3); box-shadow:0 0 7px rgba(224,92,42,0.28); }
+
   @media (max-width: 500px) {
     .make-ten-board { grid-template-columns: repeat(3, 1fr); }
     .make-ten-token { min-width: 58px; font-size: 1.18rem; padding: 10px 10px; }
@@ -732,9 +811,10 @@
 
 <div class="tabs">
   <button class="tab-btn active" onclick="switchTab(0)">✦ Spell I: Make Ten</button>
-  <button class="tab-btn" onclick="switchTab(1)">✦ Spell II: Strategy</button>
-  <button class="tab-btn" onclick="switchTab(2)">✦ Spell III: Slide</button>
-  <button class="tab-btn" onclick="switchTab(3)">🏆 Spell IV: O.W.L. Exam</button>
+  <button class="tab-btn" onclick="switchTab(1)">✦ Spell II: Near Doubles</button>
+  <button class="tab-btn" onclick="switchTab(2)">✦ Spell III: Strategy</button>
+  <button class="tab-btn" onclick="switchTab(3)">✦ Spell IV: Slide</button>
+  <button class="tab-btn" onclick="switchTab(4)">🏆 Spell V: O.W.L. Exam</button>
 </div>
 
 <!-- ===== TAB 1: MAKE TEN ===== -->
@@ -762,8 +842,25 @@
   </div>
 </div>
 
-<!-- ===== TAB 2: STRATEGY ===== -->
+<!-- ===== TAB 2: NEAR DOUBLES ===== -->
 <div class="tab-panel" id="tab1">
+  <div class="card" style="padding:18px 20px">
+    <div style="color:var(--muted);font-size:0.88rem;line-height:1.6">
+      <strong style="color:var(--accent2)">Near-Doubles Spell:</strong> Add close numbers by splitting the larger number into a matching double plus the leftover. For example: <strong>5 + 6 → 5 + (5 + 1) = 10 + 1 = 11</strong>.
+    </div>
+  </div>
+
+  <div class="card" id="nearDoublesWorkspace">
+    <!-- rendered by JS -->
+  </div>
+
+  <div class="card" id="nearDoublesBallDisplay">
+    <!-- rendered by JS -->
+  </div>
+</div>
+
+<!-- ===== TAB 3: STRATEGY ===== -->
+<div class="tab-panel" id="tab2">
   <!-- Intro -->
   <div class="card" style="padding:18px 20px">
     <div style="color:var(--muted);font-size:0.88rem;line-height:1.6">
@@ -801,8 +898,8 @@
   </div>
 </div>
 
-<!-- ===== TAB 3: SLIDE ===== -->
-<div class="tab-panel" id="tab2">
+<!-- ===== TAB 4: SLIDE ===== -->
+<div class="tab-panel" id="tab3">
   <div class="card">
     <div class="number-display-wrap">
       <div class="number-picker">
@@ -844,8 +941,8 @@
   </div>
 </div>
 
-<!-- ===== TAB 4: CHALLENGE ===== -->
-<div class="tab-panel" id="tab3">
+<!-- ===== TAB 5: CHALLENGE ===== -->
+<div class="tab-panel" id="tab4">
   <div class="card" style="padding:16px 20px">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
       <div style="display:flex;gap:16px">
@@ -1117,6 +1214,156 @@ function renderMakeTenSpell() {
           <div style="font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent3);margin-top:8px">${mtB}</div>
         </div>
       </div>`;
+  }
+}
+
+
+// ============================
+// SPELL II — NEAR DOUBLES ADDITION
+// ============================
+let ndOrigA = 5;
+let ndOrigB = 6;
+
+function randomNearDoublesPair() {
+  const base = Math.floor(Math.random() * 8) + 1;
+  const diff = Math.random() < 0.75 ? 1 : 2;
+  const larger = Math.min(9, base + diff);
+  const smaller = larger - diff;
+  if (Math.random() < 0.5) return {a: smaller, b: larger};
+  return {a: larger, b: smaller};
+}
+function setNearDoublesFact(a, b) {
+  a = clampDigit(a); b = clampDigit(b);
+  if (a === null || b === null) {
+    const pair = randomNearDoublesPair();
+    a = pair.a; b = pair.b;
+  }
+  ndOrigA = a; ndOrigB = b;
+  const aEl = document.getElementById('ndA');
+  const bEl = document.getElementById('ndB');
+  if (aEl) aEl.value = ndOrigA;
+  if (bEl) bEl.value = ndOrigB;
+  renderNearDoublesSpell();
+}
+function setNearDoublesFromInputs() {
+  const aEl = document.getElementById('ndA');
+  const bEl = document.getElementById('ndB');
+  const aRaw = aEl ? aEl.value : '';
+  const bRaw = bEl ? bEl.value : '';
+  if (aRaw === '' || bRaw === '') {
+    const pair = randomNearDoublesPair();
+    setNearDoublesFact(pair.a, pair.b);
+    return;
+  }
+  const a = clampDigit(aRaw);
+  const b = clampDigit(bRaw);
+  if (a === null || b === null) return;
+  ndOrigA = a; ndOrigB = b;
+  if (aEl && String(aEl.value) !== String(a)) aEl.value = a;
+  if (bEl && String(bEl.value) !== String(b)) bEl.value = b;
+  renderNearDoublesSpell();
+}
+function randomNearDoublesFact() {
+  const pair = randomNearDoublesPair();
+  setNearDoublesFact(pair.a, pair.b);
+}
+function nearDotsHtml(n, cls) {
+  if (n <= 0) return '<div class="near-dot-row"><span style="font-size:0.8rem;color:var(--muted);font-style:italic">none</span></div>';
+  return '<div class="near-dot-row">' + Array(n).fill(`<div class="near-dot ${cls || ''}"></div>`).join('') + '</div>';
+}
+function renderNearDoublesSpell() {
+  const ws = document.getElementById('nearDoublesWorkspace');
+  if (!ws) return;
+  const a = ndOrigA;
+  const b = ndOrigB;
+  const total = a + b;
+  const small = Math.min(a, b);
+  const large = Math.max(a, b);
+  const leftover = large - small;
+  const largerOnLeft = a >= b;
+  const equal = a === b;
+  const splitLeft = largerOnLeft
+    ? `<span style="color:var(--teal)">(${small} + ${leftover})</span> + ${b}`
+    : `${a} + <span style="color:var(--teal)">(${small} + ${leftover})</span>`;
+  const compactSplitLeft = largerOnLeft
+    ? `(${small} + ${leftover}) + ${b}`
+    : `${a} + (${small} + ${leftover})`;
+  const doubleValue = small + small;
+  const guidance = equal
+    ? `This is already a double: <strong>${a} + ${b} = ${total}</strong>.`
+    : `Split the larger number on the same side where it appears. That reveals the double: <strong>${small} + ${small} = ${doubleValue}</strong>, then add the leftover <strong>${leftover}</strong>.`;
+  const leftBox = equal
+    ? `${a}`
+    : (largerOnLeft ? `<span style="font-size:1.15rem">${small} + ${leftover}</span>` : `${a}`);
+  const rightBox = equal
+    ? `${b}`
+    : (!largerOnLeft ? `<span style="font-size:1.15rem">${small} + ${leftover}</span>` : `${b}`);
+  const leftClass = !equal && largerOnLeft ? ' split' : '';
+  const rightClass = !equal && !largerOnLeft ? ' split' : '';
+
+  ws.innerHTML = `<div class="objects-label">Near-Doubles Workspace</div>
+    <div class="number-picker" style="margin-bottom:12px">
+      <div class="picker-group">
+        <div class="picker-label">Number A</div>
+        <input class="picker-input" id="ndA" type="number" min="1" max="9" value="${a}" placeholder="random" oninput="setNearDoublesFromInputs()">
+      </div>
+      <div class="picker-group" style="justify-content:center;padding-top:22px">
+        <span style="font-size:1.5rem;color:var(--accent2);font-weight:900">+</span>
+      </div>
+      <div class="picker-group">
+        <div class="picker-label">Number B</div>
+        <input class="picker-input" id="ndB" type="number" min="1" max="9" value="${b}" placeholder="random" oninput="setNearDoublesFromInputs()">
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <button class="step-btn" onclick="randomNearDoublesFact()" style="margin-top:0">✨ Random Near Double</button>
+      <button class="reset-btn" onclick="setNearDoublesFact(5,6)" style="margin-top:0">Show 5 + 6</button>
+      <button class="reset-btn" onclick="setNearDoublesFact(6,5)" style="margin-top:0">Show 6 + 5</button>
+    </div>
+    <div class="near-double-work">
+      <div class="near-double-number">
+        <div class="near-double-label">Number A</div>
+        <div class="near-double-value${leftClass}">${leftBox}</div>
+      </div>
+      <div class="transfer-plus">+</div>
+      <div class="near-double-number">
+        <div class="near-double-label">Number B</div>
+        <div class="near-double-value${rightClass}">${rightBox}</div>
+      </div>
+    </div>
+    <div class="near-double-eq">
+      <div class="near-double-token">${a} + ${b}</div>
+      <div class="make-ten-arrow">=</div>
+      <div class="near-double-token">${equal ? `${a} + ${b}` : splitLeft}</div>
+      <div class="make-ten-arrow">=</div>
+      <div class="near-double-token double">${equal ? `${total}` : `${doubleValue} + ${leftover}`}</div>
+      <div class="make-ten-arrow">=</div>
+      <div class="near-double-token">${total}</div>
+    </div>
+    <div class="explanation" style="margin-bottom:12px;text-align:center">${guidance}</div>
+    <div class="transfer-note">Near doubles works best for neighbors like 5 + 6, 6 + 7, or 8 + 9. The larger number is split in place so the original order still makes sense.</div>`;
+
+  const balls = document.getElementById('nearDoublesBallDisplay');
+  if (balls) {
+    balls.innerHTML = `<div class="objects-label">Ball Display</div>
+      <div class="explanation" style="margin-bottom:14px;text-align:center">
+        Gold shows the smaller matching group. Teal shows the matching part of the larger number. Orange shows the leftover.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start">
+        <div class="val-chip" style="padding:12px">
+          <div class="label">First ${small}</div>
+          ${nearDotsHtml(small, '')}
+        </div>
+        <div class="val-chip" style="padding:12px">
+          <div class="label">Matching ${small}</div>
+          ${nearDotsHtml(small, 'match')}
+        </div>
+        <div class="val-chip" style="padding:12px">
+          <div class="label">Leftover ${leftover}</div>
+          ${nearDotsHtml(leftover, 'extra')}
+        </div>
+      </div>
+      <div class="result-line" style="margin-top:14px">${compactSplitLeft} → ${small} + ${small} + ${leftover} = ${total}</div>`;
   }
 }
 
@@ -1920,13 +2167,14 @@ function renderChallenge() {
 function switchTab(idx) {
   document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
   document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
-  if (idx === 3) renderHistoryPanel();
+  if (idx === 4) renderHistoryPanel();
 }
 
 // ============================
 // INIT
 // ============================
 renderMakeTenSpell();
+renderNearDoublesSpell();
 initTask1();
 initStrategy();
 renderHistoryPanel();
