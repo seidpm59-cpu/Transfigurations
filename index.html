@@ -745,30 +745,20 @@
     </div>
   </div>
 
-  <div class="card">
-    <div class="number-picker" style="margin-bottom:10px">
-      <div class="picker-group">
-        <div class="picker-label">Number A</div>
-        <input class="picker-input" id="mtA" type="number" min="1" max="9" value="9" placeholder="random" oninput="setMakeTenFromInputs()">
-      </div>
-      <div class="picker-group" style="justify-content:center;padding-top:22px">
-        <span style="font-size:1.5rem;color:var(--accent2);font-weight:900">+</span>
-      </div>
-      <div class="picker-group">
-        <div class="picker-label">Number B</div>
-        <input class="picker-input" id="mtB" type="number" min="1" max="9" value="4" placeholder="random" oninput="setMakeTenFromInputs()">
-      </div>
-    </div>
-    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">
-      <button class="step-btn" onclick="randomMakeTenFact()">✨ Random Fact</button>
-      <button class="reset-btn" onclick="setMakeTenFact(9,4)">Show 9 + 4</button>
-      <button class="reset-btn" onclick="resetMakeTenTransfer()">↺ Reset this fact</button>
-    </div>
-    <div class="make-ten-board" id="makeTenBoard"></div>
-  </div>
-
   <div class="card" id="makeTenWorkspace">
     <!-- rendered by JS -->
+  </div>
+
+  <div class="card" id="makeTenBallDisplay">
+    <!-- rendered by JS -->
+  </div>
+
+  <div class="card">
+    <div class="objects-label" style="margin-bottom:12px">Addition Board</div>
+    <div class="explanation" style="margin-bottom:14px;text-align:center">
+      Tap a fact to load it into the Make-Ten Workspace above.
+    </div>
+    <div class="make-ten-board" id="makeTenBoard"></div>
   </div>
 </div>
 
@@ -1060,6 +1050,24 @@ function renderMakeTenSpell() {
   const aTenClass = mtA === 10 ? ' ten' : '';
   const bTenClass = mtB === 10 ? ' ten' : '';
   ws.innerHTML = `<div class="objects-label">Make-Ten Workspace</div>
+    <div class="number-picker" style="margin-bottom:12px">
+      <div class="picker-group">
+        <div class="picker-label">Number A</div>
+        <input class="picker-input" id="mtA" type="number" min="1" max="9" value="${mtOrigA}" placeholder="random" oninput="setMakeTenFromInputs()">
+      </div>
+      <div class="picker-group" style="justify-content:center;padding-top:22px">
+        <span style="font-size:1.5rem;color:var(--accent2);font-weight:900">+</span>
+      </div>
+      <div class="picker-group">
+        <div class="picker-label">Number B</div>
+        <input class="picker-input" id="mtB" type="number" min="1" max="9" value="${mtOrigB}" placeholder="random" oninput="setMakeTenFromInputs()">
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <button class="step-btn" onclick="randomMakeTenFact()" style="margin-top:0">✨ Random Fact</button>
+      <button class="reset-btn" onclick="setMakeTenFact(9,4)" style="margin-top:0">Show 9 + 4</button>
+      <button class="reset-btn" onclick="resetMakeTenTransfer()" style="margin-top:0">↺ Reset this fact</button>
+    </div>
     <div class="make-ten-transfer">
       <div class="transfer-number">
         <div class="transfer-label">Number A</div>
@@ -1086,22 +1094,30 @@ function renderMakeTenSpell() {
       <div class="make-ten-token glow">${total}</div>
     </div>
     <div class="explanation" style="margin-bottom:12px;text-align:center">${guidance}</div>
-    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
       <button class="step-btn" onclick="autoMakeTen()" style="margin-top:0">✨ Auto Make Ten</button>
       <button class="reset-btn" onclick="resetMakeTenTransfer()" style="margin-top:0">↺ Back to ${mtOrigA} + ${mtOrigB}</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start">
-      <div class="val-chip" style="padding:12px">
-        <div class="label">A ten-frame</div>
-        ${tenFrameHtml(Math.min(mtOrigA, mtA), movedFromB)}
-        <div style="font-size:0.8rem;color:var(--muted);font-style:italic;margin-top:6px">Gold = original A; teal = moved from B</div>
-      </div>
-      <div class="val-chip" style="padding:12px">
-        <div class="label">B leftovers</div>
-        ${leftoverDotsHtml(mtB)}
-        <div style="font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent3);margin-top:8px">${mtB}</div>
-      </div>
     </div>`;
+
+  const balls = document.getElementById('makeTenBallDisplay');
+  if (balls) {
+    balls.innerHTML = `<div class="objects-label">Ball Display</div>
+      <div class="explanation" style="margin-bottom:14px;text-align:center">
+        Watch the dots move into a ten-frame. Gold dots begin with A; teal dots are traded from B.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start">
+        <div class="val-chip" style="padding:12px">
+          <div class="label">A ten-frame</div>
+          ${tenFrameHtml(Math.min(mtOrigA, mtA), movedFromB)}
+          <div style="font-size:0.8rem;color:var(--muted);font-style:italic;margin-top:6px">Gold = original A; teal = moved from B</div>
+        </div>
+        <div class="val-chip" style="padding:12px">
+          <div class="label">B leftovers</div>
+          ${leftoverDotsHtml(mtB)}
+          <div style="font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent3);margin-top:8px">${mtB}</div>
+        </div>
+      </div>`;
+  }
 }
 
 // ============================
