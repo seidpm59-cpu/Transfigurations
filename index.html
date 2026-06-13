@@ -632,15 +632,11 @@
     padding: 0 1px;
   }
   .place-digit.key-place {
-    background: rgba(78,201,176,0.72);
+    background: rgba(78,201,176,0.82);
     color: #06140f;
     border-radius: 3px;
-    box-shadow: 0 0 12px rgba(78,201,176,0.75), 0 0 24px rgba(78,201,176,0.35);
-    animation: keyPlaceBlink 1.05s steps(2, start) infinite;
-  }
-  @keyframes keyPlaceBlink {
-    0%, 48% { opacity: 1; filter: brightness(1.18); }
-    49%, 100% { opacity: 0.38; filter: brightness(0.85); }
+    box-shadow: 0 0 12px rgba(78,201,176,0.78), 0 0 24px rgba(78,201,176,0.38);
+    filter: brightness(1.12);
   }
   .decompose-minus {
     font-size: 2.25rem;
@@ -690,7 +686,7 @@
     color: var(--accent2); font-weight: 700; padding-top: 0; padding-left: 2px; padding-right: 2px;
     align-self: center;
     line-height: 1;
-    transform: translateY(-5px);
+    transform: translateY(-9px);
   }
   .transfer-change {
     min-height: 20px;
@@ -722,25 +718,25 @@
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:7px;
-    min-width:96px;
+    gap:8px;
+    min-width:108px;
   }
   .near-double-value {
     background: var(--digit-bg);
     border: 2px solid var(--border);
-    border-radius: 9px;
-    width: 84px;
-    min-height: 70px;
+    border-radius: 10px;
+    width: 100px;
+    min-height: 82px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Space Mono', monospace;
-    font-size: 1.8rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--text);
     box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3);
     text-align:center;
-    padding:6px;
+    padding:8px;
   }
   .near-double-value.split {
     border-color: var(--teal);
@@ -905,8 +901,8 @@
 </div>
 
 <div class="tabs">
-  <button class="tab-btn active" onclick="switchTab(0)">✦ Spell I: Make Ten</button>
-  <button class="tab-btn" onclick="switchTab(1)">✦ Spell II: Decompose</button>
+  <button class="tab-btn active" onclick="switchTab(0)">✦ Spell I: Decompose</button>
+  <button class="tab-btn" onclick="switchTab(1)">✦ Spell II: Make Ten</button>
   <button class="tab-btn" onclick="switchTab(2)">✦ Spell III: Near Doubles</button>
   <button class="tab-btn" onclick="switchTab(3)">✦ Spell IV: Strategy</button>
   <button class="tab-btn" onclick="switchTab(4)">✦ Spell V: Slide</button>
@@ -920,8 +916,25 @@
   <div class="score-chip"><div class="sc-label">Streak 🔥</div><div class="sc-val" id="practiceStreakCount">0</div></div>
 </div>
 
-<!-- ===== TAB 1: MAKE TEN ===== -->
+<!-- ===== TAB 1: DECOMPOSE SUBTRACTION ===== -->
 <div class="tab-panel active" id="tab0">
+  <div class="card" style="padding:18px 20px">
+    <div style="color:var(--muted);font-size:0.88rem;line-height:1.6">
+      <strong style="color:var(--accent2)">Decompose Spell:</strong> Subtract by shifting both numbers down by the same amount until the first number becomes a friendly ten. For example: <strong>33 − 5 → 30 − 2 = 28</strong>.
+    </div>
+  </div>
+
+  <div class="card" id="decomposeWorkspace">
+    <!-- rendered by JS -->
+  </div>
+
+  <div class="card" id="decomposeBallDisplay">
+    <!-- rendered by JS -->
+  </div>
+</div>
+
+<!-- ===== TAB 2: MAKE TEN ===== -->
+<div class="tab-panel" id="tab1">
   <div class="card" style="padding:18px 20px">
     <div style="color:var(--muted);font-size:0.88rem;line-height:1.6">
       <strong style="color:var(--accent2)">Make-Ten Spell:</strong> Add by trading between the two numbers without changing the total. Push one number up toward <strong>10</strong> while the other moves down by the same amount: <strong>9 + 4 → 10 + 3 = 13</strong>.
@@ -942,23 +955,6 @@
       Tap a fact to load it into the Make-Ten Workspace above.
     </div>
     <div class="make-ten-board" id="makeTenBoard"></div>
-  </div>
-</div>
-
-<!-- ===== TAB 2: DECOMPOSE SUBTRACTION ===== -->
-<div class="tab-panel" id="tab1">
-  <div class="card" style="padding:18px 20px">
-    <div style="color:var(--muted);font-size:0.88rem;line-height:1.6">
-      <strong style="color:var(--accent2)">Decompose Spell:</strong> Subtract by shifting both numbers down by the same amount until the first number becomes a friendly ten. For example: <strong>33 − 5 → 30 − 2 = 28</strong>.
-    </div>
-  </div>
-
-  <div class="card" id="decomposeWorkspace">
-    <!-- rendered by JS -->
-  </div>
-
-  <div class="card" id="decomposeBallDisplay">
-    <!-- rendered by JS -->
   </div>
 </div>
 
@@ -1153,6 +1149,16 @@ function clampDigit(n) {
   if (isNaN(n)) return null;
   return Math.max(1, Math.min(9, n));
 }
+function clampMakeTenNumber(n) {
+  n = parseInt(n, 10);
+  if (isNaN(n)) return null;
+  return Math.max(1, Math.min(99, n));
+}
+function nextFriendlyTen(n) {
+  const remainder = ((n % 10) + 10) % 10;
+  return remainder === 0 ? n : n + (10 - remainder);
+}
+function isFriendlyTen(n) { return n > 0 && n % 10 === 0; }
 function randomDigit() { return Math.floor(Math.random() * 9) + 1; }
 function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function randomMakeTenPair() {
@@ -1164,7 +1170,7 @@ function randomMakeTenPair() {
   return {a, b};
 }
 function setMakeTenFact(a, b) {
-  a = clampDigit(a); b = clampDigit(b);
+  a = clampMakeTenNumber(a); b = clampMakeTenNumber(b);
   if (a === null || b === null) {
     const pair = randomMakeTenPair();
     a = pair.a; b = pair.b;
@@ -1190,8 +1196,8 @@ function setMakeTenFromInputs() {
     setMakeTenFact(pair.a, pair.b);
     return;
   }
-  const a = clampDigit(aRaw);
-  const b = clampDigit(bRaw);
+  const a = clampMakeTenNumber(aRaw);
+  const b = clampMakeTenNumber(bRaw);
   if (a === null || b === null) return;
   mtOrigA = a; mtOrigB = b; mtTransfer = 0;
   mtLoggedKey = null;
@@ -1217,7 +1223,7 @@ function moveMakeTen(dir) {
   const proposed = mtTransfer + dir;
   const newA = mtOrigA + proposed;
   const newB = mtOrigB - proposed;
-  if (newA < 0 || newB < 0 || newA > 18 || newB > 18) return;
+  if (newA < 0 || newB < 0 || newA > 99 || newB > 99) return;
   mtTransfer = proposed;
   mtA = newA;
   mtB = newB;
@@ -1225,8 +1231,8 @@ function moveMakeTen(dir) {
   renderMakeTenSpell();
 }
 function autoMakeTen() {
-  const needA = 10 - mtOrigA;
-  const needB = 10 - mtOrigB;
+  const needA = nextFriendlyTen(mtOrigA) - mtOrigA;
+  const needB = nextFriendlyTen(mtOrigB) - mtOrigB;
   if (needA > 0 && mtOrigB >= needA) mtTransfer = needA;
   else if (needB > 0 && mtOrigA >= needB) mtTransfer = -needB;
   else mtTransfer = 0;
@@ -1247,7 +1253,7 @@ function submitMakeTenAnswer() {
   mtAnswerWrong = !correct;
   mtAnsweredCorrect = correct;
   trackPracticeAttempt(
-    'Spell I: Make Ten',
+    'Spell II: Make Ten',
     `${mtOrigA} + ${mtOrigB}`,
     raw,
     total,
@@ -1291,9 +1297,9 @@ function makeTenChallengeBanner() {
     ? `Challenge complete: ${mtChallengeCorrect}/${STRATEGY_CHALLENGE_TOTAL} correct`
     : `Question ${mtChallengeIndex} of ${STRATEGY_CHALLENGE_TOTAL} · Correct ${mtChallengeCorrect}`;
   const color = mtChallengeComplete ? '#50e090' : 'var(--accent)';
-  return `<div class="val-chip" style="margin:0 auto 14px;max-width:360px;padding:10px 14px;border-color:${mtChallengeComplete ? 'rgba(80,224,144,0.35)' : 'var(--border)'}">
-    <div class="label">Spell I Challenge</div>
-    <div class="value" style="color:${color}">${label}</div>
+  return `<div class="val-chip" style="margin:0 auto 14px;max-width:320px;padding:7px 12px;border-color:${mtChallengeComplete ? 'rgba(80,224,144,0.35)' : 'var(--border)'}">
+    <div class="label" style="font-size:0.58rem;letter-spacing:0.8px">Spell II Challenge</div>
+    <div class="value" style="color:${color};font-size:0.92rem;line-height:1.25">${label}</div>
   </div>`;
 }
 function tenFrameHtml(anchor, moved) {
@@ -1334,7 +1340,7 @@ function renderMakeTenSpell() {
   renderMakeTenBoard(mtOrigA, mtOrigB);
 
   const movedFromB = Math.max(0, mtTransfer);
-  const madeTen = mtA === 10 || mtB === 10;
+  const madeTen = isFriendlyTen(mtA) || isFriendlyTen(mtB);
   const canMoveBtoA = mtB > 0;
   const canMoveAtoB = mtA > 0;
 
@@ -1346,20 +1352,34 @@ function renderMakeTenSpell() {
   } else if (total < 10) {
     guidance = `This fact is below ten, so the make-ten spell is optional. You can still trade up and down, then type the answer when ready.`;
   } else {
-    const needA = 10 - mtA;
-    const needB = 10 - mtB;
-    if (needA > 0 && mtB >= needA) guidance = `Move <strong>${needA}</strong> from B to A to make <strong>10</strong>, or press <strong>Show me</strong>.`;
-    else if (needB > 0 && mtA >= needB) guidance = `Move <strong>${needB}</strong> from A to B to make <strong>10</strong>, or press <strong>Show me</strong>.`;
+    const needA = nextFriendlyTen(mtA) - mtA;
+    const needB = nextFriendlyTen(mtB) - mtB;
+    if (needA > 0 && mtB >= needA) guidance = `Move <strong>${needA}</strong> from B to A to make <strong>${nextFriendlyTen(mtA)}</strong>, or press <strong>Show me</strong>.`;
+    else if (needB > 0 && mtA >= needB) guidance = `Move <strong>${needB}</strong> from A to B to make <strong>${nextFriendlyTen(mtB)}</strong>, or press <strong>Show me</strong>.`;
     else guidance = `Keep trading one at a time. The two numbers change together, but the answer stays the same.`;
   }
 
-  const aTenClass = mtA === 10 ? ' ten' : '';
-  const bTenClass = mtB === 10 ? ' ten' : '';
+  const aTenClass = isFriendlyTen(mtA) ? ' ten' : '';
+  const bTenClass = isFriendlyTen(mtB) ? ' ten' : '';
   const answerBorder = mtAnswerWrong ? 'var(--accent3)' : mtAnsweredCorrect ? '#50e090' : 'var(--accent)';
   ws.innerHTML = `<div class="objects-label">Make-Ten Workspace</div>
     ${makeTenChallengeBanner()}
+    <div class="number-picker" style="margin-bottom:12px">
+      <div class="picker-group">
+        <div class="picker-label">Number A</div>
+        <input class="picker-input" id="mtA" type="number" min="1" max="99" value="${mtOrigA}" placeholder="random" onchange="setMakeTenFromInputs()">
+      </div>
+      <div class="picker-group" style="justify-content:center;padding-top:22px">
+        <span style="font-size:1.35rem;color:var(--accent2);font-weight:900">+</span>
+      </div>
+      <div class="picker-group">
+        <div class="picker-label">Number B</div>
+        <input class="picker-input" id="mtB" type="number" min="1" max="99" value="${mtOrigB}" placeholder="random" onchange="setMakeTenFromInputs()">
+      </div>
+    </div>
     <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:16px">
       <button class="step-btn" onclick="resetMakeTenChallenge()" style="margin-top:0">✨ Start New 10-Question Challenge</button>
+      <button class="reset-btn" onclick="setMakeTenFromInputs()" style="margin-top:0">Apply Numbers</button>
       <button class="reset-btn" onclick="resetMakeTenTransfer()" style="margin-top:0">↺ Reset this fact</button>
     </div>
     <div class="make-ten-transfer">
@@ -1404,8 +1424,8 @@ function renderMakeTenSpell() {
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start">
         <div class="val-chip" style="padding:12px">
-          <div class="label">A ten-frame</div>
-          ${tenFrameHtml(Math.min(mtOrigA, mtA), movedFromB)}
+          <div class="label">Friendly-ten frame</div>
+          ${mtA <= 10 && mtOrigA <= 10 ? tenFrameHtml(Math.min(mtOrigA, mtA), movedFromB) : `<div class="too-many">A is ${mtA}; use the number boxes above for larger make-ten facts.</div>`}
           <div style="font-size:0.8rem;color:var(--muted);font-style:italic;margin-top:6px">Gold = original A; teal = moved from B</div>
         </div>
         <div class="val-chip" style="padding:12px">
@@ -1532,7 +1552,7 @@ function submitDecomposeAnswer() {
   dcAnswerWrong = !correct;
   dcAnsweredCorrect = correct;
   trackPracticeAttempt(
-    'Spell II: Decompose',
+    'Spell I: Decompose',
     `${dcOrigA} − ${dcOrigB}`,
     raw,
     answer,
@@ -1574,9 +1594,9 @@ function decomposeChallengeBanner() {
     ? `Challenge complete: ${dcChallengeCorrect}/${STRATEGY_CHALLENGE_TOTAL} correct`
     : `Question ${dcChallengeIndex} of ${STRATEGY_CHALLENGE_TOTAL} · Correct ${dcChallengeCorrect}`;
   const color = dcChallengeComplete ? '#50e090' : 'var(--accent)';
-  return `<div class="val-chip" style="margin:0 auto 14px;max-width:360px;padding:10px 14px;border-color:${dcChallengeComplete ? 'rgba(80,224,144,0.35)' : 'var(--border)'}">
-    <div class="label">Spell II Challenge</div>
-    <div class="value" style="color:${color}">${label}</div>
+  return `<div class="val-chip" style="margin:0 auto 14px;max-width:320px;padding:7px 12px;border-color:${dcChallengeComplete ? 'rgba(80,224,144,0.35)' : 'var(--border)'}">
+    <div class="label" style="font-size:0.58rem;letter-spacing:0.8px">Spell I Challenge</div>
+    <div class="value" style="color:${color};font-size:0.92rem;line-height:1.25">${label}</div>
   </div>`;
 }
 
@@ -1845,9 +1865,9 @@ function nearDoublesChallengeBanner() {
     ? `Challenge complete: ${ndChallengeCorrect}/${STRATEGY_CHALLENGE_TOTAL} correct`
     : `Question ${ndChallengeIndex} of ${STRATEGY_CHALLENGE_TOTAL} · Correct ${ndChallengeCorrect}`;
   const color = ndChallengeComplete ? '#50e090' : 'var(--accent)';
-  return `<div class="val-chip" style="margin:0 auto 14px;max-width:360px;padding:10px 14px;border-color:${ndChallengeComplete ? 'rgba(80,224,144,0.35)' : 'var(--border)'}">
-    <div class="label">Spell III Challenge</div>
-    <div class="value" style="color:${color}">${label}</div>
+  return `<div class="val-chip" style="margin:0 auto 14px;max-width:320px;padding:7px 12px;border-color:${ndChallengeComplete ? 'rgba(80,224,144,0.35)' : 'var(--border)'}">
+    <div class="label" style="font-size:0.58rem;letter-spacing:0.8px">Spell III Challenge</div>
+    <div class="value" style="color:${color};font-size:0.92rem;line-height:1.25">${label}</div>
   </div>`;
 }
 function nearDotsHtml(n, cls) {
@@ -2569,7 +2589,7 @@ function maybeTrackMakeTenCompletion(total, madeTen) {
   const moved = Math.abs(mtTransfer);
   const direction = mtTransfer > 0 ? `moved ${moved} from B to A` : mtTransfer < 0 ? `moved ${moved} from A to B` : 'already made ten';
   trackPracticeSpell(
-    'Spell I: Make Ten',
+    'Spell II: Make Ten',
     `${mtOrigA} + ${mtOrigB} = ${mtA} + ${mtB} = ${total}`,
     'Made a friendly ten while keeping the total unchanged.',
     direction,
